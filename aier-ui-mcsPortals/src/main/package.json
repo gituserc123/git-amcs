@@ -1,0 +1,18 @@
+{
+  "name": "ahis-auto-deploy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-md5-soplus": "^1.4.0",
+    "gulp-requirejs-simple": "0.0.1",
+    "minimist": "^1.2.6",
+    "jsonfile": "^6.1.0"
+  }
+}

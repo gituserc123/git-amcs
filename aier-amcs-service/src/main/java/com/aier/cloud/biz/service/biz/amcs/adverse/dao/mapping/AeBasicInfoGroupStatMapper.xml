@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.adverse.dao.AeBasicInfoGroupStatMapper">
+
+	<sql id="sql_where1">
+		<if test="cond.hospId != null">
+			and t.hosp_id = #{cond.hospId}
+		</if>
+		<if test="cond.hospList != null and cond.hospList.size() > 0">
+			and t.hosp_id in
+			<foreach collection="cond.hospList" index="index" item="item"
+					 separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cond.staffList != null and cond.staffList.size() > 0">
+			and t.creator in
+			<foreach collection="cond.staffList" index="index" item="item"
+					 separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cond.creator != null">
+			and t.creator = #{cond.creator}
+		</if>
+		<if test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+			and t.create_date between
+			to_date(concat(#{cond.reportDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+			and t.event_date between
+			to_date(concat(#{cond.eventDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.countType == 1">
+			and t.node > 1 and t.status = 0 and t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and t.finish_sign = 0
+		</if>
+		<if test="cond.countType == 2">
+			and t.node > 1 and t.status = 0 and t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and
+			t.finish_sign = 0 and
+			sysdate - t.event_date >
+			90
+		</if>
+		<if test="cond.countType == 3">
+			and t.node > 1 and t.status = 0 and
+			t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and t.dispute_sign = 1
+		</if>
+		<if test="cond.countType == 4">
+			and t.node > 1 and t.status = 0 and
+			t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and t.compensation_amount
+			> 0
+		</if>
+		<if test="cond.countType == 5">
+			and t.node > 1 and
+			t.report_times >1
+		</if>
+		<if test="cond.tags != null and cond.tags != ''  ">
+			and exists (select 'x' from t_ae_event_tags et where et.event_id
+			= t.id and et.using_sign = 1 and et.tag_code in
+			<foreach collection="cond.tags.split(',')" index="index"
+					 item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="cond.gradeOneCodeStr != null and cond.gradeOneCodeStr != ''  ">
+			and t.grade_one_code in
+			<foreach item="item" index="index" collection="cond.gradeOneCodeStr.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 医院等级 -->
+		<if test="cond.ehrLevel != null  and cond.ehrLevel != '' ">
+			and t.ehr_level = #{cond.ehrLevel}
+		</if>
+		<!-- 事件分类 -->
+		<if test="cond.eventCode != null and cond.eventCode != '' ">
+			and t.event_code in
+			<foreach item="item" index="index" collection="cond.eventCode.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 事件分类一级名称 -->
+		<if test="cond.gradeOne != null and cond.gradeOne != ''  ">
+			and t.grade_one = #{cond.gradeOne}
+		</if>
+		<!-- 亚专科名称 -->
+		<if test="cond.subspecialty != null and cond.subspecialty != ''  ">
+			and t.subspecialty = #{cond.subspecialty}
+		</if>
+		<if test="cond.eventLevels != null and cond.eventLevels != ''  ">
+			and t.event_level in
+			<foreach collection="cond.eventLevels.split(',')" index="index"
+					 item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+
+	<select id="countProvReviewOver10Days" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select t.hosp_id, count(1) val
+		from t_ae_basic_info t
+		inner join (
+			SELECT basic_id,
+			MAX(CASE WHEN node = 3 THEN modify_date END) AS node3_date,
+			MAX(CASE WHEN node = 2 THEN modify_date END) AS node2_date,
+			CASE
+			WHEN MAX(CASE WHEN node = 3 THEN modify_date END) IS NOT NULL
+			AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL THEN
+			TRUNC(MAX(CASE WHEN node = 3 THEN modify_date END) -
+			MAX(CASE WHEN node = 2 THEN modify_date END))
+			WHEN MAX(CASE WHEN node = 3 THEN modify_date END) IS NULL
+			AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL THEN
+			TRUNC(SYSDATE - MAX(CASE WHEN node = 2 THEN modify_date END))
+			ELSE NULL
+			END AS days_diff
+			FROM T_AE_OPERATION_RECORD
+			GROUP BY basic_id
+			HAVING
+			(MAX(CASE WHEN node = 3 THEN modify_date END) IS NOT NULL
+			AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL
+			AND TRUNC(MAX(CASE WHEN node = 3 THEN modify_date END) -
+			MAX(CASE WHEN node = 2 THEN modify_date END)) > 10)
+			OR (MAX(CASE WHEN node = 3 THEN modify_date END) IS NULL
+			AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL
+			AND TRUNC(SYSDATE - MAX(CASE WHEN node = 2 THEN modify_date END)) > 10)
+		) sq ON sq.basic_id = t.id
+		where t.node > 1
+		and t.status = 0
+		and t.report_times = 1
+		and (t.id = t.master_id OR t.master_id IS NULL)
+		and t.hosp_id <![CDATA[<]]> 9900
+		<include refid="sql_where1" />
+		group by t.hosp_id
+		order by val desc
+	</select>
+
+
+</mapper>

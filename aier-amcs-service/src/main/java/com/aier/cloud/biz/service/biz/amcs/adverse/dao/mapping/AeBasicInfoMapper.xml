@@ -1,0 +1,1608 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.aier.cloud.biz.service.biz.amcs.adverse.dao.AeBasicInfoMapper">
+
+	<sql id="BaseColumnList">
+		ID, MASTER_ID, PREV_ID, HOSP_ID, HOSP_NAME, HOSP_SIGN,
+		PATIENT_ID, PATIENT_NO, PATIENT_NAME, PATIENT_SEX, PATIENT_AGE,
+		REPORT_TIMES,
+		EVENT_NAME, NODE, STATUS, SUBSPECIALTY, EVENT_DATE,
+		DATE_TYPE,
+		GRADE_ONE, GRADE_TWO_A, GRADE_TWO_B, GRADE_TWO_REMARK,
+		PROCESS_PROGRESS, PROCESS_TYPE,
+		COMPENSATION_AMOUNT, DEDUCTION_AMOUNT,
+		EVENT_LEVEL, ADDRESS, PERIOD, FINDER,
+		DISPUTE_SIGN, FINISH_SIGN,
+		STAFF_ID, STAFF_AGE, STAFF_SEX, STAFF_DEGREE,
+		STAFF_WORK, STAFF_YEARS,
+		TECHNICAL_POST, TECHNICAL_POST_DATE,
+		STAFF_TYPE, STAFF_NAME,
+		REASON,
+		OPINION, CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE,
+		EVENT_CODE,
+		PATIENT_BIRTH, PATIENT_JOB, PATIENT_NATIONALITY, PATIENT_ID_NUMBER,
+		EVENT_ID,
+		NEXT_NODE, DEPARTMENT, STAFF_YEARS_IN_EYE, ADDRESS_REMARK,
+		SUBSPECIALTY_CODE,
+		GRADE_ONE_CODE,
+		GRADE_TWO_A_CODE,ADDRESS_INAREA_REMARK,
+		ADDRESS_OPERROOM_REMARK,OTHER_PROCESS_RESULT,
+		IS_GROUP_REVIEW,OA_REQUEST_ID,IS_ARCHIVED,AMOUNT_DATE,SEVERITY_LEVEL,
+		IS_HIGH_RISK, IS_FIRST_REPORT, DAMAGE_TYPE,MANUAL_INPUT_REASON,
+		IS_EHR_DEPT_REVIEW,EHR_AI_STAND_DEPTID,EHR_AI_STAND_DEPTID_DESCR
+	</sql>
+	<select id="getLastReportTimes" resultType="Integer">
+		select
+		nvl(max(REPORT_TIMES), 1) as last_times
+		from T_AE_BASIC_INFO t
+		where
+		PREV_ID = #{prevId} or id = #{prevId}
+	</select>
+	<select id="getLastEventInfo" resultType="Map">
+		select t.prev_id as basic_id, max(report_times) as last_time,
+		max(create_date) as last_date
+		from t_ae_basic_info t
+		where t.prev_id in
+		<foreach collection="basicIds" index="index" item="item"
+			separator="," open="(" close=")">
+			#{item}
+		</foreach>
+		group by t.prev_id;
+	</select>
+
+	<select id="getCountByCond" resultType="Integer">
+		select count('X') from T_AE_BASIC_INFO t
+		where t.status = 0
+		<if test="cond.isProvinceReview == true" >
+			and ((t.report_times=1 and t.event_code != 109) or (t.report_times = 2 and t.event_code = 109))
+		</if>
+		<if test="cond.isProvinceReview != true" >
+			and t.report_times=1
+		</if>
+		<if test="cond.node != null ">
+			and t.node = #{cond.node}
+		</if>
+		<if test="cond.hospList != null and cond.hospList.size() > 0">
+			and t.hosp_id in
+			<foreach collection="cond.hospList" index="index" item="item"
+				separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="findReturnList" resultType="Map">
+		SELECT t.id, t.EVENT_NAME, t.EVENT_DATE, t.CREATE_DATE, t.EVENT_LEVEL,
+		t.CREATOR, t.EVENT_CODE, t.EVENT_ID, t.MASTER_ID,
+		t.GRADE_ONE,
+		t.GRADE_TWO_A, t.GRADE_TWO_B, t.node, t.HOSP_NAME, t.PATIENT_NAME,
+		t.HOSP_ID,
+		decode(r.node, 2, '医院退回', 3, '省区退回', 4, '集团退回', '未知') as
+		node_name,
+		case when t.modify_date > r.modify_date then '历史退回' else
+		'当前被退回' end as
+		reback_name,
+		c.EVENT_URL, c.EVENT_NAME as
+		event_type_name, r.MODIFER, r.MODIFY_DATE as
+		audit_date, r.OPINION,
+		t.MODIFY_DATE
+		FROM
+		T_AE_BASIC_INFO t
+		left join T_AE_OPERATION_RECORD r on
+		t.id =
+		r.BASIC_ID
+		left join t_ae_event_config c on c.event_code =
+		t.event_code
+		where r.TYPE = 6
+		<if test="cond.creator != null and cond.creator != '' ">
+			and exists (select 'X' from t_ae_basic_info pre
+			where (pre.id = t.prev_id or pre.id = t.id) and pre.creator = #{cond.creator})
+		</if>
+		<if test="cond.node != null ">
+			and t.node = #{cond.node}
+		</if>
+		<if test="cond.rebackNode != null ">
+			and r.node = #{cond.rebackNode}
+		</if>
+		<if test="cond.eventType != null and cond.eventType != '' ">
+			and t.event_code = #{cond.eventType}
+		</if>
+		<!-- 事件分类 -->
+		<if test="cond.eventCode != null and cond.eventCode != '' ">
+			and t.event_code in
+			<foreach item="item" index="index" collection="cond.eventCode.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<choose>
+			<when test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+				and t.event_date between
+				to_date(concat(#{cond.eventDateBegin}, '
+				00:00:00'), 'YYYY-MM-DD
+				hh24:mi:ss') and
+				to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+				'YYYY-MM-DD
+				hh24:mi:ss')
+			</when>
+			<otherwise>
+				<if test="cond.eventDate != null and cond.eventDate != '' ">
+					and t.event_date = to_date(#{cond.eventDate},
+					'YYYY-MM-DD')
+				</if>
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+				and t.create_date between
+				to_date(concat(#{cond.reportDateBegin}, '
+				00:00:00'), 'YYYY-MM-DD
+				hh24:mi:ss') and
+				to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+				'YYYY-MM-DD
+				hh24:mi:ss')
+			</when>
+			<otherwise>
+				<if test="cond.reportDate != null and cond.reportDate != '' ">
+					and t.create_date between
+					to_date(concat(#{cond.reportDate}, '
+					00:00:00'), 'YYYY-MM-DD
+					hh24:mi:ss') and
+					to_date(concat(#{cond.reportDate}, ' 23:59:59'),
+					'YYYY-MM-DD
+					hh24:mi:ss')
+				</if>
+			</otherwise>
+		</choose>
+		<if test="cond.hospId != null and cond.hospId != '' ">
+			and t.hosp_id = #{cond.hospId}
+		</if>
+		<if test="cond.hospList != null and cond.hospList.size() > 0">
+			and t.hosp_id in
+			<foreach collection="cond.hospList" index="index" item="item"
+				separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cond.rebackStatus == 1">
+			and r.MODIFY_DATE >= t.MODIFY_DATE
+		</if>
+		<if test="cond.rebackStatus == 0">
+			and t.MODIFY_DATE > r.MODIFY_DATE
+		</if>
+		<if test="cond.rebackStatus == null">
+			and t.node = -1
+		</if>
+		<if test="cond.gradeOneCodeStr != null and cond.gradeOneCodeStr != ''  ">
+			and t.grade_one_code in
+			<foreach item="item" index="index" collection="cond.gradeOneCodeStr.split(',')"
+				open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<if test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+			and t.create_date between
+			to_date(concat(#{cond.reportDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+			and t.event_date between
+			to_date(concat(#{cond.eventDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.tags != null and cond.tags != ''  ">
+			and exists (select 'x' from t_ae_event_tags et where et.event_id
+			= t.id and et.using_sign = 1 and et.tag_code in
+			<foreach collection="cond.tags.split(',')" index="index"
+				item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+		order by r.MODIFY_DATE desc
+	</select>
+
+	<select id="findEntityList"
+		resultType="com.aier.cloud.biz.service.biz.amcs.adverse.entity.AeBasicInfo">
+		select
+		<include refid="BaseColumnList" />
+		from T_AE_BASIC_INFO t
+		<include refid="sql_where" />
+		order by t.report_times desc, t.CREATE_DATE desc
+	</select>
+	<select id="sumAmount" resultType="com.aier.cloud.biz.service.biz.amcs.adverse.entity.AeBasicInfo">
+		select SUM(nvl(COMPENSATION_AMOUNT, 0)) as allCompensationAmount, SUM(nvl(DEDUCTION_AMOUNT, 0)) as allDeductionAmount
+		FROM T_AE_BASIC_INFO t
+		<include refid="sql_where" />
+	</select>
+	<select id="findReviewList" resultType="Map">
+		select t.id, t.EVENT_NAME, t.EVENT_DATE, t.CREATE_DATE, t.CREATOR,
+		t.FINISH_SIGN, t.GRADE_ONE, t.PATIENT_AGE,
+		c.EVENT_URL, c.EVENT_NAME as
+		event_type_name, t.node, t.HOSP_NAME, t.PATIENT_NAME,
+		t.HOSP_ID, t.SUBSPECIALTY,
+		decode(t.node, 0, '暂存', 1, '上报未审核', 2, '医院审核通过', 3, '省区审核通过', 4,
+		'集团已查阅', '未知') as
+		node_name, t.EVENT_CODE, t.status, t.MODIFY_DATE,
+		pt.prov_audit_date
+		<if test="cond.isExpert == true" >
+		 ,(select max(modify_date) from t_ae_expert_event e where e.event_id = t.id and e.expert_id = #{cond.expertId} and e.using_sign = 1) as assign_date,
+		 (select count('x') from
+				t_ae_operation_record r
+				where r.basic_id in (select t1.id from
+				amcs.t_ae_basic_info t1 where
+				t1.id = t.id or t1.prev_id = t.id)
+				and r.node = 5
+				and r.type = 7) as e_review_status
+		</if>
+		
+		from
+		t_ae_basic_info t
+		left join t_ae_event_config c on c.event_code = t.event_code
+		left join (select max(pr.modify_date) as prov_audit_date, pr.basic_id
+               from t_ae_operation_record pr
+              where pr.node = 3 and pr.type = 1
+              group by pr.basic_id) pt on pt.basic_id IN (SELECT t1.id FROM amcs.t_ae_basic_info t1
+                        WHERE t1.id = t.id OR t1.prev_id = t.id)
+		<include refid="sql_where" />
+		and pt.prov_audit_date is not null
+		<choose>
+		  <when test="cond.sort !=null and cond.sort=='provAuditDate'"> 
+			  order by pt.prov_audit_date #{cond.order}
+		  </when>
+		  <when test="cond.sort !=null and cond.sort=='eventDate'">
+			  order by t.EVENT_DATE #{cond.order}
+		  </when>
+		  <otherwise>
+			  order by t.CREATE_DATE desc
+		  </otherwise>
+	  	</choose>
+
+	</select>
+	<select id="findListByCond" resultType="Map">
+		select t.id, t.EVENT_NAME, t.EVENT_DATE, t.CREATE_DATE, t.EVENT_LEVEL,
+		t.CREATOR, t.FINISH_SIGN, t.PATIENT_NAME,
+		t.GRADE_ONE, t.GRADE_TWO_A,
+		t.PATIENT_AGE,
+		t.SUBSPECIALTY,
+		t.GRADE_TWO_B, c.EVENT_URL, c.EVENT_NAME as event_type_name, t.node,
+		t.HOSP_NAME, t.HOSP_ID,
+		decode(t.node, 0,
+		'暂存',
+		1, '上报未审核', 2,
+		'医院审核通过', 3, '省区审核通过', 4, '集团已查阅', '未知') as
+		node_name,
+		t.EVENT_CODE,
+		t.EVENT_ID, t.MASTER_ID,
+		t.report_times,
+		decode((decode(t.master_id,
+		t.id, 1, 0) + decode(t.prev_id, null, 1,
+		0)), 0, '否', '是') is_primary,
+		t.PREV_ID,
+		t.SEVERITY_LEVEL,
+		t.IS_HIGH_RISK,
+		(select min(modify_date) from t_ae_operation_record r where r.basic_id = t.id and r.node = 3 and type = 1) as p_audit_date,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+		t.compensation_amount, t.deduction_amount, t.status,
+		(select SUM(tt.compensation_amount)
+		from t_ae_basic_info tt
+		where (tt.prev_id = t.id or tt.id = t.id)
+		or tt.master_id = t.id) as total_compensation_amount,
+		(select SUM(tt.deduction_amount)
+		from t_ae_basic_info tt
+		where (tt.prev_id = t.id or tt.id = t.id)
+		or tt.master_id = t.id) as total_deduction_amount,
+		t.IS_GROUP_REVIEW,t.is_archived,t.MODIFY_DATE, fe.id as focus_id,
+		t.IS_EHR_DEPT_REVIEW,t.EHR_AI_STAND_DEPTID,t.EHR_AI_STAND_DEPTID_DESCR
+		from T_AE_BASIC_INFO t
+		left join
+		t_ae_event_config c on c.event_code = t.event_code
+		left join
+		t_ae_focus_event fe on fe.basic_id = t.id and fe.modifer =
+		<choose>
+			<when test="cond.operator != null and cond.operator != ''">
+				#{cond.operator}
+			</when>
+			<otherwise>
+				0
+			</otherwise>
+		</choose>
+		<include refid="sql_where" />
+
+		order by t.CREATE_DATE desc
+	</select>
+	<select id="queryListByCond" resultType="Map">
+		select * from (
+		select t.*,
+		nvl((select max(report_times) from
+		t_ae_basic_info t1 where t1.report_times > 1
+		and t1.prev_id = t.id ),
+		0) as max_report_times
+		,(select min(modify_date) from t_ae_operation_record toper
+		where toper.basic_id = t.id) as min_oper_date,
+		COALESCE(t1.unplan, t2.unplan, t3.unplan, t4.unplan) AS unplan,
+		(select SUM(tt.compensation_amount)
+		from t_ae_basic_info tt
+		where (tt.prev_id = t.id or tt.id = t.id)
+		or tt.master_id = t.id) as total_compensation_amount,
+		(select SUM(tt.deduction_amount)
+		from t_ae_basic_info tt
+		where (tt.prev_id = t.id or tt.id = t.id)
+		or tt.master_id = t.id) as total_deduction_amount,
+		(select max(tt.amount_date)
+		from t_ae_basic_info tt
+		where (tt.prev_id = t.id or tt.id = t.id)
+		or tt.master_id = t.id) as last_amount_date
+		from T_AE_BASIC_INFO t
+		LEFT JOIN
+		t_ae_inp t1 ON t1.basic_id = t.id
+		LEFT JOIN
+		T_AE_OUTP_PATIENT t2 ON t2.basic_id = t.id
+		LEFT JOIN
+		T_AE_INFECTION t3 ON t3.basic_id = t.id
+		LEFT JOIN
+		T_AE_UNPL_REOPERATION t4 ON t4.basic_id = t.id
+
+		<include refid="sql_where_queryListByCond" />
+		) tmp
+		where 1=1
+		<if test="cond.maxReportTimes != null">
+			and tmp.max_report_times &gt;= #{cond.maxReportTimes}
+		</if>
+		<!-- 赔偿金额范围 -->
+		<if test="cond.compensationAmount != null">
+			and tmp.total_compensation_amount <![CDATA[>=]]> #{cond.compensationAmount}
+		</if>
+		<if test="cond.compensationUpAmount != null">
+			and tmp.total_compensation_amount <![CDATA[<=]]> #{cond.compensationUpAmount}
+		</if>
+		<!-- 减免金额范围 -->
+		<if test="cond.deductionAmount != null">
+			and tmp.total_deduction_amount <![CDATA[>=]]> #{cond.deductionAmount}
+		</if>
+		<if test="cond.deductionUpAmount != null">
+			and tmp.total_deduction_amount <![CDATA[<=]]> #{cond.deductionUpAmount}
+		</if>
+		order by tmp.CREATE_DATE desc
+	</select>
+	<sql id="sql_where_queryListByCond">
+		where 1=1
+		and t.status = 0
+		and t.report_times=1
+		<!-- 非计划事件 -->
+		<if test="cond.unplan != null and cond.unplan > 0 ">
+		 and (exists (select 'x'
+			from T_AE_INP t1
+			where t1.basic_id = t.id
+			and t1.unplan = #{cond.unplan}) or exists
+			(select 'x'
+			from T_AE_OUTP_PATIENT t2
+			where t2.basic_id = t.id
+			and t2.unplan = #{cond.unplan}) or exists
+			(select 'x'
+			from T_AE_INFECTION t3
+			where t3.basic_id = t.id
+			and t3.unplan = #{cond.unplan}) or exists
+			(select 'x'
+			from T_AE_UNPL_REOPERATION t4
+			where t4.basic_id = t.id
+			and t4.unplan = #{cond.unplan}))
+		</if>
+		and (t.prev_id is null or
+		t.id=t.prev_id)
+		<!-- 非计划事件只有进展上报后才可以查询到 -->
+		and (t.event_code != 109 or exists (select 'x' from t_ae_basic_info t1 where t1.prev_id = t.id))
+		<!-- 被合并的非主事件记录不用查询出来 -->
+		and (t.id = t.master_id or t.master_id is null)
+		<!-- 集团已审阅的记录不用查询出来 -->
+		<!-- and (t.is_group_review = 0 or t.is_group_review is null) -->
+		<choose>
+			<when test="cond.showArchived != null and cond.showArchived != true">
+				and t.node &gt;= 2
+			</when>
+			<otherwise>
+				and (t.node &gt;= 2 or t.IS_ARCHIVED=1)
+			</otherwise>
+		</choose>
+		<if test="cond.hospId != null and cond.hospId != '' ">
+			and t.hosp_id = #{cond.hospId}
+		</if>
+		<if test="cond.unOtherReport == 1 ">
+			and (t.is_first_report = 1 or t.is_first_report is null)
+		</if>
+
+
+		<if test="cond.tags != null and cond.tags != ''  ">
+			and exists (select 'x' from amcs.t_ae_event_tags et where et.event_id
+			= t.id and et.using_sign = 1 and et.tag_code in
+			<foreach collection="cond.tags.split(',')" index="index"
+					 item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="cond.severityLevels != null and cond.severityLevels != ''  ">
+			and t.severity_level in
+			<foreach collection="cond.severityLevels.split(',')" index="index"
+					 item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cond.hospList != null and cond.hospList.size() > 0">
+			and t.hosp_id in
+			<foreach collection="cond.hospList" index="index" item="item"
+					 separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cond.staffList != null and cond.staffList.size() > 0">
+			and t.creator in
+			<foreach collection="cond.staffList" index="index" item="item"
+					 separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<!-- 医院等级 -->
+		<if test="cond.ehrLevel != null and cond.ehrLevel != '' ">
+			and t.ehr_level = #{cond.ehrLevel}
+		</if>
+		<!-- 事件分级 -->
+		<if test="cond.eventLevel != null and cond.eventLevel != '' ">
+			and t.event_level in
+			<foreach item="item" index="index" collection="cond.eventLevel.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 是否完结 -->
+		<if test="cond.finishSign != null ">
+			and t.finish_sign = #{cond.finishSign}
+		</if>
+		<!-- 是否高风险 -->
+		<if test="cond.isHighRisk != null ">
+			and t.is_high_risk = #{cond.isHighRisk}
+		</if>
+		<!--显示归档 -->
+		<if test="cond.showArchived != null and cond.showArchived != true">
+			and t.IS_ARCHIVED!=1
+		</if>
+		<choose>
+			<when test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+				and t.event_date between
+				to_date(concat(#{cond.eventDateBegin}, '
+				00:00:00'), 'YYYY-MM-DD
+				hh24:mi:ss') and
+				to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+				'YYYY-MM-DD
+				hh24:mi:ss')
+			</when>
+			<otherwise>
+				<if test="cond.eventDate != null and cond.eventDate != '' ">
+					and t.event_date = to_date(#{cond.eventDate},
+					'YYYY-MM-DD')
+				</if>
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+				and t.create_date between
+				to_date(concat(#{cond.reportDateBegin}, '
+				00:00:00'), 'YYYY-MM-DD
+				hh24:mi:ss') and
+				to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+				'YYYY-MM-DD
+				hh24:mi:ss')
+			</when>
+			<otherwise>
+				<if test="cond.reportDate != null and cond.reportDate != '' ">
+					and t.create_date between
+					to_date(concat(#{cond.reportDate}, '
+					00:00:00'), 'YYYY-MM-DD
+					hh24:mi:ss') and
+					to_date(concat(#{cond.reportDate}, ' 23:59:59'),
+					'YYYY-MM-DD
+					hh24:mi:ss')
+				</if>
+			</otherwise>
+		</choose>
+		<!-- 赔付/减免金额发生时间 -->
+		<if test="cond.amountDateBegin != '' and cond.amountDateEnd != '' ">
+			AND exists
+			(select 'x'
+			from t_ae_basic_info tt
+			where (tt.prev_id = t.id or tt.id = t.id)
+			and tt.amount_date between
+			to_date(concat(#{cond.amountDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.amountDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss'))
+		</if>
+		<!-- 省区审核通过时间 -->
+		<if test="(cond.provAuditDateBegin != null and cond.provAuditDateBegin != '') and (cond.provAuditDateEnd != null and cond.provAuditDateEnd != '')">
+			and exists (select 'X' from t_ae_operation_record r where t.id = r.basic_id
+			and r.node = 3 and r.type = 1 and r.modify_date between
+			to_date(concat(#{cond.provAuditDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.provAuditDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss'))
+		</if>
+		<!-- 患者姓名 -->
+		<if test="cond.patientName != null and cond.patientName != '' ">
+			and t.patient_name like
+			concat('%',concat(#{cond.patientName},'%'))
+		</if>
+		<!-- 事件分类一级 -->
+		<if test="cond.gradeOneCodeStr != null and cond.gradeOneCodeStr != ''  ">
+			and t.grade_one_code in
+			<foreach item="item" index="index" collection="cond.gradeOneCodeStr.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 事件分类二级 -->
+		<if test="cond.gradeTwoACodeStr != null and cond.gradeTwoACodeStr != ''  ">
+			and t.grade_two_a_code in
+			<foreach item="item" index="index" collection="cond.gradeTwoACodeStr.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 亚专科 -->
+		<if test="cond.subspecialtyCode != null and cond.subspecialtyCode != '' ">
+			and t.subspecialty_code in
+			<foreach item="item" index="index" collection="cond.subspecialtyCode.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 事件分类 -->
+		<if test="cond.eventCode != null and cond.eventCode != '' ">
+			and t.event_code in
+			<foreach item="item" index="index" collection="cond.eventCode.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!--事件名称-->
+		<if test="cond.eventName != null and cond.eventName != '' ">
+			and t.event_name like concat('%',concat(#{cond.eventName},'%'))
+		</if>
+		<!--当事人员姓名-->
+		<if test="cond.staffName != null and cond.staffName != '' ">
+			and t.staff_name like concat('%',concat(#{cond.staffName},'%'))
+		</if>
+	</sql>
+	<update id="updateOaRequestById">
+		update T_AE_BASIC_INFO t
+		set t.OA_REQUEST_ID =
+		#{requestId}
+		where t.id = #{id}
+	</update>
+	<update id="archivedById">
+		update T_AE_BASIC_INFO t
+		set t.IS_ARCHIVED =1
+		where id
+		= #{id}
+	</update>
+	<sql id="sql_where">
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			1 = 1
+			<if test="cond.createName != null and cond.createName != '' ">
+				and t.creator like concat(#{createName},'%')
+			</if>
+			<if test="cond.tags != null and cond.tags != ''  ">
+				and exists (select 'x' from amcs.t_ae_event_tags et where
+				et.event_id = t.id and et.using_sign = 1 and et.tag_code in
+				<foreach collection="cond.tags.split(',')" index="index"
+					item="item" separator="," open="(" close=")">
+					TRIM(#{item})
+				</foreach>
+				)
+			</if>
+			<if test="cond.severityLevels != null and cond.severityLevels != ''  ">
+				and t.severity_level in
+				<foreach collection="cond.severityLevels.split(',')" index="index"
+					item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="cond.isGroupReview == 0 ">
+				<choose>
+					<when test="cond.pageType == 4">
+						and not exists (select 'x' from
+						amcs.t_ae_operation_record r
+						where r.basic_id = t.id and r.node = 4
+						and r.type = 8
+						<if test="cond.groupReviewEmpIds != null and cond.groupReviewEmpIds.size() > 0">
+							and r.MODIFER in
+							<foreach collection="cond.groupReviewEmpIds" index="index" item="item"
+									 separator="," open="(" close=")">
+								#{item}
+							</foreach>
+						</if>
+						)
+					</when>
+					<otherwise>
+						and (t.is_group_review = 0 or t.is_group_review is null)
+					</otherwise>
+				</choose>
+			</if>
+			<!-- 非计划首次上报，省区和集团无法查看到 -->
+			<if test="(cond.pageType == 3 or cond.pageType == 4) and cond.reportTimes == 1">
+				and (t.event_code != 109 or exists (select 'x' from t_ae_basic_info t1 where t1.prev_id = t.id and t1.node > 1))
+			</if>
+			<if test="cond.isGroupReview == 1 ">
+				<choose>
+					<when test="cond.pageType == 4">
+						and exists (select 'x' from
+						amcs.t_ae_operation_record r
+						where r.basic_id = t.id and r.node = 4
+						and r.type = 8
+						<if test="cond.groupReviewEmpIds != null and cond.groupReviewEmpIds.size() > 0">
+							and r.MODIFER in
+							<foreach collection="cond.groupReviewEmpIds" index="index" item="item"
+									 separator="," open="(" close=")">
+								#{item}
+							</foreach>
+						</if>
+						)
+					</when>
+					<otherwise>
+						and t.is_group_review = 1
+					</otherwise>
+				</choose>
+
+			</if>
+			<if test="cond.creator != null and cond.creator != '' ">
+				and t.creator = #{cond.creator}
+			</if>
+			<if test="cond.isPrimary == true ">
+				and (t.id = t.master_id or t.master_id is null)
+			</if>
+			<if test="cond.isMerge == true">
+				and t.master_id is null and t.PREV_ID is null and t.id !=
+				#{cond.masterId}
+			</if>
+			<if test="cond.hospId != null and cond.hospId != '' ">
+				and t.hosp_id = #{cond.hospId}
+			</if>
+			<if test="cond.basicIds != null and cond.basicIds.size() > 0">
+				and t.id in
+				<foreach collection="cond.basicIds" index="index" item="item"
+					separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="cond.hospList != null and cond.hospList.size() > 0">
+				and t.hosp_id in
+				<foreach collection="cond.hospList" index="index" item="item"
+					separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="cond.staffList != null and cond.staffList.size() > 0">
+				and t.creator in
+				<foreach collection="cond.staffList" index="index" item="item"
+					separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<!-- 事件分级 -->
+			<if test="cond.eventLevel != null and cond.eventLevel != '' ">
+				and t.event_level = #{cond.eventLevel}
+			</if>
+
+			<if test="cond.eventLevels != null and cond.eventLevels != ''  ">
+				and t.event_level in
+				<foreach collection="cond.eventLevels.split(',')" index="index"
+					item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="cond.reportTimes != null and cond.reportTimes != '' ">
+				and t.REPORT_TIMES = #{cond.reportTimes}
+			</if>
+			<if test="cond.eventType != null and cond.eventType != '' ">
+				and t.event_code = #{cond.eventType}
+			</if>
+			<!-- 是否完结 -->
+			<if test="cond.finishSign != null ">
+				and t.finish_sign = #{cond.finishSign}
+			</if>
+			<if test="cond.status != null ">
+				and t.status = #{cond.status}
+			</if>
+			<if test="cond.showArchived != null and cond.showArchived != true ">
+				and t.IS_ARCHIVED!=1
+			</if>
+			<if test="cond.isFocus == true ">
+				and fe.id is not null
+			</if>
+			<choose>
+				<when test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+					and t.event_date between
+					to_date(concat(#{cond.eventDateBegin}, '
+					00:00:00'), 'YYYY-MM-DD
+					hh24:mi:ss') and
+					to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+					'YYYY-MM-DD
+					hh24:mi:ss')
+				</when>
+				<otherwise>
+					<if test="cond.eventDate != null and cond.eventDate != '' ">
+						and t.event_date = to_date(#{cond.eventDate},
+						'YYYY-MM-DD')
+					</if>
+				</otherwise>
+			</choose>
+			<if test="(cond.provAuditDateBegin != null and cond.provAuditDateBegin != '') and (cond.provAuditDateEnd != null and cond.provAuditDateEnd != '')">
+			    and exists (select 'X' from t_ae_operation_record r where t.id = r.basic_id
+			    and r.node = 3 and r.type = 1 and r.modify_date between 
+			    to_date(concat(#{cond.provAuditDateBegin}, '
+					00:00:00'), 'YYYY-MM-DD
+					hh24:mi:ss') and
+					to_date(concat(#{cond.provAuditDateEnd}, ' 23:59:59'),
+					'YYYY-MM-DD
+					hh24:mi:ss'))
+			</if>
+			<if test="cond.isExpert == true" >
+				 and exists (select 'x' from t_ae_expert_event e WHERE e.event_id = t.id and e.expert_id = #{cond.expertId}
+				<if test="(cond.assignDateBegin != null and cond.assignDateBegin != '') and (cond.assignDateEnd != null and cond.assignDateEnd != '')">
+					 and e.modify_date between to_date(concat(#{cond.assignDateBegin}, '00:00:00'), 'YYYY-MM-DD hh24:mi:ss') 
+					 	and to_date(concat(#{cond.assignDateEnd}, ' 23:59:59'),'YYYY-MM-DD hh24:mi:ss')
+				</if>
+				)
+			</if>
+			<choose>
+				<when test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+					and t.create_date between
+					to_date(concat(#{cond.reportDateBegin}, '
+					00:00:00'), 'YYYY-MM-DD
+					hh24:mi:ss') and
+					to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+					'YYYY-MM-DD
+					hh24:mi:ss')
+				</when>
+				<otherwise>
+					<if test="cond.reportDate != null and cond.reportDate != '' ">
+						and t.create_date between
+						to_date(concat(#{cond.reportDate}, '
+						00:00:00'), 'YYYY-MM-DD
+						hh24:mi:ss') and
+						to_date(concat(#{cond.reportDate}, ' 23:59:59'),
+						'YYYY-MM-DD
+						hh24:mi:ss')
+					</if>
+				</otherwise>
+			</choose>
+			<if test="cond.eReviewStatus == 0 ">
+				and not exists (select 'x' from
+				amcs.t_ae_operation_record r
+				where r.basic_id in (select t1.id from
+				amcs.t_ae_basic_info t1 where
+				t1.id = t.id or t1.prev_id = t.id)
+				and r.node = 5
+				and r.type = 7)
+			</if>
+			<if test="cond.eReviewStatus == 1 ">
+			   and exists (select 'x' from
+				amcs.t_ae_operation_record r
+				where r.basic_id in (select t1.id from
+				amcs.t_ae_basic_info t1 where
+				t1.id = t.id or t1.prev_id = t.id)
+				and r.node = 5
+				and r.type = 7)
+			</if>
+			<if test="cond.pReviewStatus != null and cond.pReviewStatus == 0 ">
+				and not exists (select 'x' from
+				amcs.t_ae_operation_record r
+				where r.basic_id in (select t1.id from
+				amcs.t_ae_basic_info t1 where
+				t1.id = t.id or t1.prev_id = t.id)
+				and
+				r.node = 3 and r.type = 7)
+			</if>
+			<if test="cond.pReviewStatus != null and cond.pReviewStatus == 1 ">
+				and exists (select 'x' from amcs.t_ae_operation_record r
+				where r.basic_id in (select t1.id from amcs.t_ae_basic_info t1 where
+				t1.id = t.id or t1.prev_id = t.id)
+				and r.node = 3 and r.type = 7)
+			</if>
+			<if test="cond.gReviewStatus != null and cond.gReviewStatus == 0 ">
+				and not exists (select 'x' from
+				amcs.t_ae_operation_record r
+				where r.basic_id in (select t1.id from
+				amcs.t_ae_basic_info t1 where
+				t1.id = t.id or t1.prev_id = t.id)
+				and
+				r.node = 4 and r.type = 7)
+			</if>
+			<if test="cond.gReviewStatus != null and cond.gReviewStatus == 1 ">
+				and exists (select 'x' from amcs.t_ae_operation_record r
+				where r.basic_id in (select t1.id from amcs.t_ae_basic_info t1 where
+				t1.id = t.id or t1.prev_id = t.id)
+				and r.node = 4 and r.type = 7)
+			</if>
+			<if test="cond.hasAssignExpert == 0 ">
+				and not exists (select 'X' from amcs.t_ae_expert_event e where e.event_id = t.id )
+			</if>
+			<if test="cond.hasAssignExpert == 1 ">
+				and exists (select 'X' from amcs.t_ae_expert_event e where e.event_id = t.id )
+			</if>
+
+			<if test="cond.patientNo != null and cond.patientNo != '' ">
+				and t.patient_no = #{cond.patientNo}
+			</if>
+			<if test="cond.type != null ">
+				and t.event_code like concat(#{cond.type},'%')
+			</if>
+			<if test="cond.types != null and cond.types != '' ">
+				and
+				<foreach item="item" index="index" collection="cond.types.split(',')"
+					open="(" separator="or" close=")">
+					t.event_code like
+					concat(#{item}, '%')
+				</foreach>
+			</if>
+
+			<if test="cond.showAllNode != 1 ">
+				<choose>
+					<when test="cond.node == null or cond.node == ''">
+						<choose>
+							<!-- 集团可以查看省区节点的不良事件 -->
+							<when test="cond.pageType == 4">
+								and t.node in (2, 3, 4)
+							</when>
+							<otherwise>
+								<if test="cond.nodeSeq != null and cond.nodeSeq != '' ">
+									and t.next_node >= #{cond.nodeSeq}
+								</if>
+								and t.node >= 0
+							</otherwise>
+						</choose>
+					</when>
+					<otherwise>
+						and t.node = #{cond.node}
+					</otherwise>
+				</choose>
+			</if>
+
+			<!-- 二次上报及合并事件 -->
+			<if test="cond.operateType == 11 ">
+				and ( (t.prev_id = #{cond.prevId} or t.id= #{cond.prevId}
+				or t.prev_id
+				= #{cond.id} or t.id = #{cond.id}) or t.master_id =
+				#{cond.masterId}
+				)
+			</if>
+			<!-- 二次上报 -->
+			<if test="cond.operateType == 12 ">
+				and (t.prev_id = #{cond.prevId} or t.id = #{cond.prevId})
+			</if>
+			<!-- 患者姓名 -->
+			<if test="cond.patientName != null and cond.patientName != '' ">
+				and t.patient_name like
+				concat('%',concat(#{cond.patientName},'%'))
+			</if>
+			<!-- 事件分类一级 -->
+			<if test="cond.gradeOneCodeStr != null and cond.gradeOneCodeStr != ''  ">
+				and t.grade_one_code in
+				<foreach item="item" index="index" collection="cond.gradeOneCodeStr.split(',')"
+					open="(" separator="," close=")">TRIM(#{item})</foreach>
+			</if>
+			<!-- 事件分类二级 -->
+			<if test="cond.gradeTwoACodeStr != null and cond.gradeTwoACodeStr != ''  ">
+				and t.grade_two_a_code in
+				<foreach item="item" index="index"
+					collection="cond.gradeTwoACodeStr.split(',')" open="(" separator=","
+					close=")">#{item}</foreach>
+			</if>
+			<!-- 亚专科 -->
+			<if test="cond.subspecialtyCode != null and cond.subspecialtyCode != '' ">
+				and t.subspecialty_code in
+				<foreach item="item" index="index"
+					collection="cond.subspecialtyCode.split(',')" open="(" separator=","
+					close=")">#{item}</foreach>
+			</if>
+			<if test="cond.overDays != null">
+			  and t.modify_date &lt; (sysdate - #{cond.overDays})
+			</if>
+			<!-- 医院等级 -->
+			<if test="cond.ehrLevel != null and cond.ehrLevel != ''  ">
+				and t.ehr_level = #{cond.ehrLevel}
+			</if>
+			<!-- 上报人所属EHR标准部门编号 -->
+			<if test="cond.ehrAiStandDeptId != null and cond.ehrAiStandDeptId != ''  ">
+				and t.ehr_ai_stand_deptid = #{cond.ehrAiStandDeptId}
+			</if>
+			<!-- 上报人所属EHR标准部门编号in查询 -->
+			<if test="cond.ehrAiStandDeptIds != null and cond.ehrAiStandDeptIds != ''">
+				and t.ehr_ai_stand_deptid in
+				<foreach item="item" index="index" collection="cond.ehrAiStandDeptIds.split(',')"
+						 open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<!-- 事件分类 -->
+			<if test="cond.eventCode != null and cond.eventCode != '' ">
+				and t.event_code in
+				<foreach item="item" index="index" collection="cond.eventCode.split(',')"
+						 open="(" separator="," close=")">#{item}</foreach>
+			</if>
+		</trim>
+		<!--事件名称-->
+		<if test="cond.eventName != null and cond.eventName != '' ">
+			and t.event_name like concat('%',concat(#{cond.eventName},'%'))
+		</if>
+	</sql>
+
+	<select id="countIndex" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select
+		count(case
+		when t.node > 1 and t.status = 0 and t.report_times =
+		1 and
+		(t.id = t.master_id or t.master_id is null ) then
+		0
+		end) "总数",
+		<if test="cond.hospid != null ">
+			count(case
+			when t.node = 1 and t.status = 0 and
+			t.report_times =
+			1 and t.is_archived != 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) then
+			0
+			end) "待医院审批",
+		</if>
+		count(case
+		when t.node = 2
+		and t.status = 0 and t.report_times = 1 and
+		(t.id = t.master_id OR t.master_id IS NULL) then
+		0
+		end) "待省区审批",
+		count(case
+		when t.node = 2
+		and t.status = 0 and t.report_times = 1 and
+		(t.id = t.master_id OR t.master_id IS NULL) 
+		and t.modify_date &lt; (sysdate - 10) then
+		0
+		end) "待省区审批(超10天)",
+		count(case
+		when t.node = 3 and
+		t.status = 0 and
+		t.report_times = 1 and
+		(t.id = t.master_id OR t.master_id IS NULL) then
+		0
+		end)
+		"省区审核通过",
+		<choose>
+			<when test="cond.pageType == 4">
+				count(case
+				when t.node = -1 and t.status = 0
+				and exists (select 'x' from t_ae_operation_record opr
+				where opr.basic_id = t.id and opr.node = 4 and opr.type = 6
+				and opr.modify_date >= t.modify_date) then
+				0
+				end)
+			</when>
+			<otherwise>
+				count(case
+				when t.node = -1 and t.status = 0  then
+				0
+				end)
+			</otherwise>
+		</choose>
+		 "被回退",
+		count(case
+		when t.node > 1 and
+		t.status = 0 and t.report_times = 1 and
+		(t.id = t.master_id OR t.master_id IS NULL) and
+		t.finish_sign = 0 then
+		0
+		end) "未完结",
+		count(case
+		when t.node > 1
+		and
+		t.status = 0 and
+		t.report_times = 1 and
+		(t.id = t.master_id OR t.master_id IS NULL) and
+		t.finish_sign = 0 and
+		sysdate - t.event_date > 90 then
+		0
+		end)
+		"未完结(超过90天)",
+		count(case
+		when t.node > 1 and
+		t.status = 0 and
+		t.report_times = 1 and
+		(t.id = t.master_id OR t.master_id IS NULL) and
+		t.finish_sign = 1 then
+		0
+		end) "完结",
+		count(case
+		when t.node > 1 and
+		t.status = 0 and
+		t.report_times = 1 and
+		(t.id = t.master_id OR
+		t.master_id IS NULL) and t.dispute_sign = 1 then
+		0
+		end) "纠纷",
+		count(case
+		when t.node > 1 and t.status = 0 and
+		t.report_times = 1 and
+		(t.id =
+		t.master_id OR t.master_id IS NULL) and t.compensation_amount >
+		0 then
+		0
+		end) "赔偿",
+		count(CASE
+		WHEN t.report_times > 1 and t.node > 1 THEN
+		0
+		END)
+		"事件进展"
+		from
+		t_ae_basic_info t
+		where t.hosp_id <![CDATA[<]]>
+		9900
+		<include refid="sql_where1" />
+	</select>
+
+	<select id="countByGradeOne" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select t.grade_one text, count(1) val
+		from t_ae_basic_info t
+		where
+		t.node > 1
+		and t.status = 0
+		and t.report_times = 1
+		and (t.id =
+		t.master_id OR t.master_id IS NULL)
+		and t.hosp_id <![CDATA[<]]>
+		9900
+		<include refid="sql_where1" />
+		group by t.grade_one
+		order by val desc
+	</select>
+
+	<select id="countByDepartment" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select t.department text, count(1) val
+		from t_ae_basic_info t
+		where
+		t.node > 1
+		and t.status = 0
+		and t.report_times = 1
+		and (t.id =
+		t.master_id OR t.master_id IS NULL)
+		<include refid="sql_where1" />
+		group by t.department
+		order by val desc
+	</select>
+
+	<select id="countByHospId" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select t.hosp_id, count(1) val
+		from t_ae_basic_info t
+		where t.node > 1
+		and t.status = 0
+		and t.report_times = 1
+		and (t.id = t.master_id OR
+		t.master_id IS NULL)
+		and
+		t.hosp_id <![CDATA[<]]>
+		9900
+		<include refid="sql_where1" />
+		group by t.hosp_id
+		order by val desc
+	</select>
+
+	<select id="countByEventLevel" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select t.event_level,count(1) val
+		from t_ae_basic_info t
+		where
+		t.node >=
+		2
+		and t.status = 0
+		and t.report_times = 1
+		and (t.prev_id is
+		null or t.id =
+		t.prev_id)
+		and (t.id = t.master_id or t.master_id is
+		null)
+		and
+		t.is_archived =0 and
+		t.hosp_id <![CDATA[<]]>
+		9900
+		<include refid="sql_where1" />
+		group by t.event_level
+		order by val desc
+	</select>
+	<select id="countBySeverityLevel" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select t.severity_level, dt.value_desc as severity_name ,count(1) val
+		from t_ae_basic_info t
+		left join t_ae_dict_type dt on dt.value_code = t.severity_level and dt.type_code = 'severity_level'
+		where
+		t.node >=
+		2
+		and t.status = 0
+		and t.report_times = 1
+		and (t.prev_id is
+		null or t.id =
+		t.prev_id)
+		and (t.id = t.master_id or t.master_id is
+		null)
+		and
+		t.is_archived =0 and
+		t.hosp_id <![CDATA[<]]>
+		9900
+		<include refid="sql_where1" />
+		group by t.severity_level, dt.value_desc
+		order by t.severity_level asc
+
+	</select>
+
+
+	<select id="countBySubspecialty" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		select t.subspecialty,count(1) val
+		from t_ae_basic_info t
+		where t.node
+		>= 2
+		and t.status = 0
+		and t.report_times = 1
+		and (t.prev_id is null or
+		t.id = t.prev_id)
+		and (t.id = t.master_id or t.master_id is null)
+		and
+		t.is_archived =0 and
+		t.hosp_id <![CDATA[<]]>
+		9900
+		<include refid="sql_where1" />
+		group by t.subspecialty
+		order by val desc
+	</select>
+
+	<sql id="sql_select">
+		select id,
+		master_id,
+		prev_id,
+		hosp_id,
+		hosp_name,
+		hosp_sign,
+		patient_id,
+		patient_no,
+		patient_name,
+		patient_sex,
+		patient_age,
+		report_times,
+		event_name,
+		node,
+		status,
+		subspecialty,
+		event_date,
+		date_type,
+		grade_one,
+		grade_two_a,
+		grade_two_b,
+		grade_two_remark,
+		process_progress,
+		process_type,
+		compensation_amount,
+		deduction_amount,
+		event_level,
+		address,
+		period,
+		finder,
+		dispute_sign,
+		finish_sign,
+		staff_id,
+		staff_age,
+		staff_sex,
+		staff_degree,
+		staff_work,
+		staff_years,
+		technical_post,
+		technical_post_date,
+		staff_type,
+		staff_name,
+		reason,
+		opinion,
+		creator,
+		create_date,
+		modifer,
+		modify_date,
+		event_code,
+		patient_birth,
+		patient_job,
+		patient_nationality,
+		patient_id_number,
+		event_id,
+		next_node,
+		department,
+		staff_years_in_eye,
+		address_remark,
+		subspecialty_code,
+		grade_one_code,
+		grade_two_a_code,
+		address_inarea_remark,
+		address_operroom_remark,
+		other_process_result,
+		is_group_review,
+		oa_request_id,
+		is_archived
+		<if test="cond.groupType != null and cond.groupType != '' and cond.groupType == 'groupProvReviewOver10Days' ">
+			,sq.days_diff
+		</if>
+		from t_ae_basic_info t
+	</sql>
+
+	<sql id="sql_where1">
+		<if test="cond.hospId != null">
+			and t.hosp_id = #{cond.hospId}
+		</if>
+		<if test="cond.hospList != null and cond.hospList.size() > 0">
+			and t.hosp_id in
+			<foreach collection="cond.hospList" index="index" item="item"
+				separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cond.staffList != null and cond.staffList.size() > 0">
+			and t.creator in
+			<foreach collection="cond.staffList" index="index" item="item"
+				separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cond.creator != null">
+			and t.creator = #{cond.creator}
+		</if>
+		<if test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+			and t.create_date between
+			to_date(concat(#{cond.reportDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+			and t.event_date between
+			to_date(concat(#{cond.eventDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.countType == 1">
+			and t.node > 1 and t.status = 0 and t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and t.finish_sign = 0
+		</if>
+		<if test="cond.countType == 2">
+			and t.node > 1 and t.status = 0 and t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and
+			t.finish_sign = 0 and
+			sysdate - t.event_date >
+			90
+		</if>
+		<if test="cond.countType == 3">
+			and t.node > 1 and t.status = 0 and
+			t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and t.dispute_sign = 1
+		</if>
+		<if test="cond.countType == 4">
+			and t.node > 1 and t.status = 0 and
+			t.report_times = 1 and
+			(t.id = t.master_id OR t.master_id IS NULL) and t.compensation_amount
+			> 0
+		</if>
+		<if test="cond.countType == 5">
+			and t.node > 1 and
+			t.report_times >1
+		</if>
+		<if test="cond.tags != null and cond.tags != ''  ">
+			and exists (select 'x' from t_ae_event_tags et where et.event_id
+			= t.id and et.using_sign = 1 and et.tag_code in
+			<foreach collection="cond.tags.split(',')" index="index"
+				item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="cond.gradeOneCodeStr != null and cond.gradeOneCodeStr != ''  ">
+			and t.grade_one_code in
+			<foreach item="item" index="index" collection="cond.gradeOneCodeStr.split(',')"
+				open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 医院等级 -->
+		<if test="cond.ehrLevel != null  and cond.ehrLevel != '' ">
+			and t.ehr_level = #{cond.ehrLevel}
+		</if>
+		<!-- 事件分类 -->
+		<if test="cond.eventCode != null and cond.eventCode != '' ">
+			and t.event_code in
+			<foreach item="item" index="index" collection="cond.eventCode.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 事件分类一级名称 -->
+		<if test="cond.gradeOne != null and cond.gradeOne != ''  ">
+			and t.grade_one = #{cond.gradeOne}
+		</if>
+		<!-- 亚专科名称 -->
+		<if test="cond.subspecialty != null and cond.subspecialty != ''  ">
+			and t.subspecialty = #{cond.subspecialty}
+		</if>
+		<if test="cond.eventLevels != null and cond.eventLevels != ''  ">
+			and t.event_level in
+			<foreach collection="cond.eventLevels.split(',')" index="index"
+					 item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+
+	<sql id="sql_orderBy">
+		<if test="cond.orderField != null and cond.orderField != '' and cond.orderByAsc">
+			<!-- order by #{cond.orderField} asc -->
+			order by create_date asc
+		</if>
+		<if test="cond.orderField != null and cond.orderField != '' and !cond.orderByAsc">
+		<!-- order by #{cond.orderField} desc -->
+			order by create_date desc
+		</if>
+</sql>
+
+	<select id="findByParams" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		<include refid="sql_select" />
+		where t.hosp_id <![CDATA[<]]>
+		9900
+		<include refid="sql_where1" />
+		<include refid="sql_orderBy" />
+	</select>
+	<update id="updateAmountById">
+		update T_AE_BASIC_INFO t
+		set t.COMPENSATION_AMOUNT =
+		#{amount}
+		where t.id = #{id}
+	</update>
+
+	<select id="findListCountByCond" resultType="Integer">
+		select count(1)
+		from T_AE_BASIC_INFO t
+		left join
+		t_ae_event_config c on c.event_code = t.event_code
+		left join
+		t_ae_focus_event fe on fe.basic_id = t.id and fe.modifer =
+		<choose>
+			<when test="cond.operator != null and cond.operator != ''">
+				#{cond.operator}
+			</when>
+			<otherwise>
+				0
+			</otherwise>
+		</choose>
+		<include refid="sql_where" />
+	</select>
+
+
+<select id="countByParams" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+	<include refid="sql_select" />
+	<if test="cond.groupType != null and cond.groupType != '' and cond.groupType == 'groupProvReviewOver10Days' ">
+		inner join (
+		SELECT basic_id,
+		MAX(CASE WHEN node = 3 THEN modify_date END) AS node3_date,
+		MAX(CASE WHEN node = 2 THEN modify_date END) AS node2_date,
+		CASE
+		WHEN MAX(CASE WHEN node = 3 THEN modify_date END) IS NOT NULL
+		AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL THEN
+		TRUNC(MAX(CASE WHEN node = 3 THEN modify_date END) -
+		MAX(CASE WHEN node = 2 THEN modify_date END))
+		WHEN MAX(CASE WHEN node = 3 THEN modify_date END) IS NULL
+		AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL THEN
+		TRUNC(SYSDATE - MAX(CASE WHEN node = 2 THEN modify_date END))
+		ELSE NULL
+		END AS days_diff
+		FROM T_AE_OPERATION_RECORD
+		GROUP BY basic_id
+		HAVING
+		(MAX(CASE WHEN node = 3 THEN modify_date END) IS NOT NULL
+		AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL
+		AND TRUNC(MAX(CASE WHEN node = 3 THEN modify_date END) -
+		MAX(CASE WHEN node = 2 THEN modify_date END)) > 10)
+		OR (MAX(CASE WHEN node = 3 THEN modify_date END) IS NULL
+		AND MAX(CASE WHEN node = 2 THEN modify_date END) IS NOT NULL
+		AND TRUNC(SYSDATE - MAX(CASE WHEN node = 2 THEN modify_date END)) > 10)
+		) sq ON sq.basic_id = t.id
+	</if>
+	where t.status = 0
+	and t.report_times = 1
+	and (t.id = t.master_id OR t.master_id IS NULL)
+	and t.hosp_id <![CDATA[<]]> 9900
+<choose>
+    <when test="cond.groupType == 'groupByGradeOne' or cond.groupType == 'groupByHospId' or cond.groupType == 'groupByHospName' or cond.groupType == 'groupProvReviewOver10Days'">
+        and t.node > 1
+    </when>
+    <when test="cond.groupType == 'groupBySubspecialty'">
+        and t.node >= 2
+        and (t.prev_id is null or t.id = t.prev_id)
+        and t.is_archived =0
+    </when>
+    <otherwise>
+        t.node > 1000
+    </otherwise>
+</choose>
+<include refid="sql_where1" />
+<choose>
+    <when test="cond.groupType != null and cond.groupType != '' and cond.groupType == 'groupProvReviewOver10Days' ">
+        ORDER BY sq.days_diff DESC
+    </when>
+    <otherwise>
+        <include refid="sql_orderBy" />
+    </otherwise>
+</choose>
+</select>
+
+	<!-- "首页展示（集团）" 医院感染事件统计sql -->
+	<select id="countInfectionByParams"  resultType="Integer">
+		select sum(COUNT(1)) from T_AE_BASIC_INFO t
+		where t.status = 0
+		and t.node > 1
+		and t.report_times = 1
+		and (t.id = t.master_id OR t.master_id IS NULL)
+		and t.hosp_id <![CDATA[<]]> 9900
+		<include refid="sql_where1" />
+		GROUP BY hosp_id
+		HAVING COUNT(1) >= 2
+	</select>
+
+	<!-- "首页展示（集团）" 医院感染事件查询sql -->
+	<select id="queryInfectionByParams" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		<include refid="sql_select" />
+		where t.status = 0
+		and t.node > 1
+		and t.report_times = 1
+		and (t.id = t.master_id OR t.master_id IS NULL)
+		and t.hosp_id <![CDATA[<]]> 9900
+		and t.hosp_id in(
+			select hosp_id from T_AE_BASIC_INFO t
+			where t.status = 0
+		    and t.node > 1
+			and t.report_times = 1
+			and (t.id = t.master_id OR t.master_id IS NULL)
+			and t.hosp_id <![CDATA[<]]> 9900
+			<include refid="sql_where1" />
+			GROUP BY hosp_id
+			HAVING COUNT(1) >= 2
+		)
+		<if test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+			and t.create_date between
+			to_date(concat(#{cond.reportDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+			and t.event_date between
+			to_date(concat(#{cond.eventDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.tags != null and cond.tags != ''  ">
+			and exists (select 'x' from t_ae_event_tags et where et.event_id
+			= t.id and et.using_sign = 1 and et.tag_code in
+			<foreach collection="cond.tags.split(',')" index="index"
+					 item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="cond.gradeOneCodeStr != null and cond.gradeOneCodeStr != ''  ">
+			and t.grade_one_code in
+			<foreach item="item" index="index" collection="cond.gradeOneCodeStr.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 医院等级 -->
+		<if test="cond.ehrLevel != null  and cond.ehrLevel != '' ">
+			and t.ehr_level = #{cond.ehrLevel}
+		</if>
+		order by create_date,hosp_id
+	</select>
+
+	<!-- "首页展示（集团）" 其他多发事件sql -->
+	<select id="countOtherMultipleByParams"  resultType="Integer">
+		select sum(event_count) from (
+		SELECT hosp_id, GRADE_TWO_A_CODE, COUNT(1) AS event_count
+		FROM amcs.T_AE_BASIC_INFO t
+		WHERE t.status = 0
+		AND t.node > 1
+		AND t.report_times = 1
+		AND (t.id = t.master_id OR t.master_id IS NULL)
+		and t.hosp_id <![CDATA[<]]> 9900
+		<include refid="sql_where1" />
+		GROUP BY hosp_id, GRADE_TWO_A_CODE
+		HAVING COUNT(1) >= 3)
+	</select>
+
+	<!-- "首页展示（集团）" 其他多发事件查询sql -->
+	<select id="queryOtherMultipleByParams" resultType="com.aier.cloud.basic.core.base.db.CamelKeyMap">
+		<include refid="sql_select" />
+		WHERE t.status = 0  -- 事件状态为正常
+		AND t.node > 1  -- 事件节点大于 1，表示已开始处理
+		AND t.report_times = 1  -- 仅统计首次上报的事件
+		AND (t.id = t.master_id OR t.master_id IS NULL)  -- 主事件或没有主事件
+		AND t.hosp_id <![CDATA[<]]> 9900  -- 针对特定医院的筛选
+		AND ( (t.hosp_id, t.GRADE_TWO_A_CODE) IN (
+			select hosp_id,GRADE_TWO_A_CODE from (
+				SELECT hosp_id, GRADE_TWO_A_CODE, COUNT(1) AS event_count
+				FROM amcs.T_AE_BASIC_INFO t
+				WHERE t.status = 0  -- 事件状态为正常
+					AND t.node > 1  -- 事件节点大于 1，表示已开始处理
+					AND t.report_times = 1  -- 仅统计首次上报的事件
+					AND (t.id = t.master_id OR t.master_id IS NULL)  -- 主事件或没有主事件
+					AND t.hosp_id <![CDATA[<]]> 9900  -- 针对特定医院的筛选
+					<include refid="sql_where1" />
+					GROUP BY hosp_id, GRADE_TWO_A_CODE
+					HAVING COUNT(1) >= 3)
+			)
+		)
+		<if test="cond.reportDateBegin != null and cond.reportDateEnd != ''">
+			and t.create_date between
+			to_date(concat(#{cond.reportDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.reportDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.eventDateBegin != null and cond.eventDateEnd != ''">
+			and t.event_date between
+			to_date(concat(#{cond.eventDateBegin}, '
+			00:00:00'), 'YYYY-MM-DD
+			hh24:mi:ss') and
+			to_date(concat(#{cond.eventDateEnd}, ' 23:59:59'),
+			'YYYY-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="cond.tags != null and cond.tags != ''  ">
+			and exists (select 'x' from t_ae_event_tags et where et.event_id
+			= t.id and et.using_sign = 1 and et.tag_code in
+			<foreach collection="cond.tags.split(',')" index="index"
+					 item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="cond.gradeOneCodeStr != null and cond.gradeOneCodeStr != ''  ">
+			and t.grade_one_code in
+			<foreach item="item" index="index" collection="cond.gradeOneCodeStr.split(',')"
+					 open="(" separator="," close=")">#{item}</foreach>
+		</if>
+		<!-- 医院等级 -->
+		<if test="cond.ehrLevel != null  and cond.ehrLevel != '' ">
+			and t.ehr_level = #{cond.ehrLevel}
+		</if>
+		order by create_date,hosp_id
+	</select>
+
+	<!-- "首页展示（集团）" 重点事件sql -->
+	<select id="countFocusByParams" resultType="Integer">
+		select count(1)
+		from T_AE_BASIC_INFO t
+		left join
+		t_ae_event_config c on c.event_code = t.event_code
+		left join
+		t_ae_focus_event fe on fe.basic_id = t.id and fe.modifer =
+		<choose>
+			<when test="cond.operator != null and cond.operator != ''">
+				#{cond.operator}
+			</when>
+			<otherwise>
+				0
+			</otherwise>
+		</choose>
+		<include refid="sql_where" />
+	</select>
+
+	<update id="delOa">
+		update amcs.t_ae_basic_info set compensation_amount = null, oa_request_id = null where id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.fin.dao.FinHospIsrneChkAuthMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.fin.entity.FinHospIsrneChkAuth">
+        <id column="ID" property="id"/>
+        <result column="PROVINCE_ID" property="provinceId"/>
+        <result column="PROVINCE_NAME" property="provinceName"/>
+        <result column="AUTH_CODE" property="authCode"/>
+        <result column="STAFF_CODE" property="staffCode"/>
+        <result column="STAFF_NAME" property="staffName"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="CREATOR" property="creator"/>
+        <result column="STAFF_ID" property="staffId"/>
+        <result column="PROVINCENAMES" property="provinceNames"/>
+        <result column="PROVINCEIDS" property="provinceIds"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID, PROVINCE_ID, PROVINCE_NAME, AUTH_CODE, STAFF_CODE, STAFF_NAME, CREATE_DATE, CREATOR, STAFF_ID
+    </sql>
+
+    <select id="getAllEntity" resultMap="BaseResultMap">
+        SELECT
+            STAFF_ID,
+            STAFF_CODE,
+            STAFF_NAME,
+            LISTAGG(PROVINCE_ID, ',') WITHIN GROUP (ORDER BY PROVINCE_ID) AS provinceIds,
+            LISTAGG(PROVINCE_NAME, ',') WITHIN GROUP (ORDER BY PROVINCE_ID) AS provinceNames
+        FROM
+        AMCS.T_FIN_HOSP_ISRNE_CHK_AUTH
+        where 1=1
+        <if test="cond.staffId != null and cond.staffId != ''">
+            and STAFF_ID = #{cond.staffId}
+        </if>
+        <if test="cond.staffCode != null and cond.staffCode != ''">
+            and STAFF_CODE like concat('%',concat(#{cond.staffCode},'%'))
+        </if>
+        <if test="cond.staffName != null and cond.staffName != ''">
+            and STAFF_NAME like concat('%',concat(#{cond.staffName},'%'))
+        </if>
+        GROUP BY
+        STAFF_ID, STAFF_CODE, STAFF_NAME
+    </select>
+
+</mapper>

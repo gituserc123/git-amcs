@@ -1,0 +1,20 @@
+.impowerBox{margin-top:70px!important;}
+.wrp_code{margin-top:10px!important;}
+.qrcode {
+width: 180px!important;
+}
+
+.info {
+width: initial!important;
+}
+
+.impowerBox .icon38_msg {
+width: 20px!important;
+height: 20px!important;
+background-size: 100%!important;
+}
+
+.impowerBox .status_succ .status_txt h4,
+.impowerBox .status_fail .status_txt h4 {
+font-size: 16px!important;
+}

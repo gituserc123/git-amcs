@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.fin.dao.FinHospInsuranceCheckMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.fin.entity.FinHospInsuranceCheck">
+        <id column="ID" property="id" />
+        <result column="CHECK_DATE" property="checkDate" />
+        <result column="CHECK_INST_PERSON" property="checkInstPerson" />
+        <result column="CHECK_CONTENT" property="checkContent" />
+        <result column="REGULATORY_ISSUES" property="regulatoryIssues" />
+        <result column="REGULATORY_AMOUNT" property="regulatoryAmount" />
+        <result column="APPEAL_STATUS" property="appealStatus" />
+        <result column="CASE_CLOSED" property="caseClosed" />
+        <result column="DEDUCTION_AMOUNT" property="deductionAmount" />
+        <result column="FINE_AMOUNT" property="fineAmount" />
+        <result column="OTHER_PENALTY" property="otherPenalty" />
+        <result column="HOSP_NAME" property="hospName" />
+        <result column="HOSP_ID" property="hospId" />
+        <result column="INVEST_NATURE" property="investNature" />
+        <result column="HOSP_PARENT" property="hospParent" />
+        <result column="EHR_LEVEL" property="ehrLevel" />
+        <result column="CREATOR" property="creator" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="MODIFER" property="modifer" />
+        <result column="MODIFY_DATE" property="modifyDate" />
+        <result column="COMMENTS" property="comments" />
+        <result column="PENALTY_AMOUNT" property="penaltyAmount" />
+        <result column="SELF_REFUND_AMOUNT" property="selfRefundAmount" />
+        <result column="SUM_AMOUNT" property="sumAmount" />
+<!--        <collection property="instCheckAttaches" ofType="com.aier.cloud.biz.service.biz.amcs.fin.entity.FinAttachment" column="attachId" notNullColumn="attachId" javaType="list">
+            <result column="attachId" jdbcType="DECIMAL" property="attachId" />
+            <result column="BIZ_ID" jdbcType="DECIMAL" property="bizId" />
+            <result column="BIZ_CODE" jdbcType="VARCHAR" property="bizCode" />
+            <result column="FILE_NAME" jdbcType="VARCHAR" property="fileName" />
+            <result column="FILE_TYPE" jdbcType="VARCHAR" property="fileType" />
+            <result column="FILE_SIZE" jdbcType="DECIMAL" property="fileSize" />
+            <result column="FILE_PATH" jdbcType="VARCHAR" property="filePath" />
+            <result column="FILE_ID" jdbcType="VARCHAR" property="fileId" />
+            <result column="WEB_URL" jdbcType="VARCHAR" property="webUrl" />
+        </collection>-->
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="BaseColumnList">
+        t.ID,t.CHECK_DATE,t.CHECK_INST_PERSON,t.CHECK_CONTENT,t.REGULATORY_ISSUES,t.REGULATORY_AMOUNT,t.APPEAL_STATUS,t.CASE_CLOSED,
+        t.DEDUCTION_AMOUNT,t.FINE_AMOUNT,t.OTHER_PENALTY,t.HOSP_NAME,t.HOSP_ID,t.INVEST_NATURE,t.HOSP_PARENT,t.EHR_LEVEL,
+        t.CREATOR,t.CREATE_DATE,t.MODIFER,t.MODIFY_DATE,t.COMMENTS,t.PENALTY_AMOUNT,t.SELF_REFUND_AMOUNT,t.SUM_AMOUNT
+    </sql>
+
+    <sql id="sql_where">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="cond.id != null and cond.id > 0">
+                and t.id = #{cond.id}
+            </if>
+            <if test="cond.hospId != null ">
+                and t.hosp_id = #{cond.hospId}
+            </if>
+            <if test="cond.checkDateBegin != null and cond.checkDateEnd != ''">
+                and t.check_date between
+                to_date(concat(#{cond.checkDateBegin}, '
+                00:00:00'), 'YYYY-MM-DD
+                hh24:mi:ss') and
+                to_date(concat(#{cond.checkDateEnd}, ' 23:59:59'),
+                'YYYY-MM-DD
+                hh24:mi:ss')
+            </if>
+            <!-- 是否结案 -->
+            <if test="cond.caseClosed != null ">
+                and t.case_closed = #{cond.caseClosed}
+            </if>
+            <choose>
+                <when test="cond.isAttach == null">
+                    and 1=1
+                </when>
+                <when test="cond.isAttach == 1">
+                    and EXISTS (SELECT 1 FROM AMCS.T_FIN_ATTACHMENT a WHERE a.biz_id = t.id)
+                </when>
+                <when test="cond.isAttach == 2">
+                    and not EXISTS (SELECT 1 FROM AMCS.T_FIN_ATTACHMENT a WHERE a.biz_id = t.id)
+                </when>
+            </choose>
+            <if test="cond.hospList != null and cond.hospList.size() > 0">
+                and t.hosp_id in
+                <foreach collection="cond.hospList" index="index" item="item"
+                         separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </trim>
+    </sql>
+
+    <select id="getAll" resultMap="BaseResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from T_FIN_HOSP_INSURANCE_CHECK t
+        <include refid="sql_where"/>
+        order by t.CREATE_DATE
+    </select>
+
+    <select id="getAllEntity" resultMap="BaseResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from T_FIN_HOSP_INSURANCE_CHECK t
+        <include refid="sql_where"/>
+    </select>
+
+</mapper>
