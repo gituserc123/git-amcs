@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawCivilCaseMapper">
+
+	<!-- 结果映射 -->
+	<resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawCivilCase">
+		<!-- 主键 -->
+		<id column="ID" jdbcType="DECIMAL" property="id" />
+
+		<!-- 其他字段 -->
+		<result column="INST_ID" jdbcType="DECIMAL" property="instId" />
+		<result column="INST_NAME" jdbcType="VARCHAR" property="instName" />
+		<result column="SUPER_INST_ID" jdbcType="DECIMAL" property="superInstId" />
+		<result column="SUPER_INST_NAME" jdbcType="VARCHAR" property="superInstName" />
+		<result column="CASE_CATEGORY" jdbcType="VARCHAR" property="caseCategory" />
+		<result column="CASE_TYPE_ONE" jdbcType="VARCHAR" property="caseTypeOne" />
+		<result column="CASE_TYPE_TWO" jdbcType="VARCHAR" property="caseTypeTwo" />
+		<result column="CASE_TYPE_TWO_DESC" jdbcType="VARCHAR" property="caseTypeTwoDesc" />
+		<result column="OUR_LITIGATION_SUBJECT" jdbcType="VARCHAR" property="ourLitigationSubject" />
+		<result column="PLAINTIFF_NAME" jdbcType="VARCHAR" property="plaintiffName" />
+		<result column="DEFENDANT_NAME" jdbcType="VARCHAR" property="defendantName" />
+		<result column="CASE_CAUSE" jdbcType="VARCHAR" property="caseCause" />
+		<result column="CASE_CAUSE_DESC" jdbcType="VARCHAR" property="caseCauseDesc" />
+		<result column="CASE_NO" jdbcType="VARCHAR" property="caseNo" />
+		<result column="CASE_DESC" jdbcType="VARCHAR" property="caseDesc" />
+		<result column="INVOLVED_AMOUNT" jdbcType="DECIMAL" property="involvedAmount" />
+		<result column="LITIGATION_PHASE" jdbcType="VARCHAR" property="litigationPhase" />
+		<result column="LITIGATION_PHASE_DESC" jdbcType="VARCHAR" property="litigationPhaseDesc" />
+		<result column="LITIGATION_PROGRESS" jdbcType="VARCHAR" property="litigationProgress" />
+		<result column="ARBITRATION_PHASE" jdbcType="VARCHAR" property="arbitrationPhase" />
+		<result column="ARBITRATION_PHASE_DESC" jdbcType="VARCHAR" property="arbitrationPhaseDesc" />
+		<result column="COURT_NAME" jdbcType="VARCHAR" property="courtName" />
+		<result column="HANDLER_NAME" jdbcType="VARCHAR" property="handlerName" />
+		<result column="HANDLER_PHONE" jdbcType="VARCHAR" property="handlerPhone" />
+		<result column="APPLY_UNIT" jdbcType="VARCHAR" property="applyUnit" />
+		<result column="APPLICANT_NAME" jdbcType="VARCHAR" property="applicantName" />
+		<result column="APPLICANT_PHONE" jdbcType="VARCHAR" property="applicantPhone" />
+		<result column="CASE_REASON_PROCESS" jdbcType="VARCHAR" property="caseReasonProcess" />
+		<result column="IS_PUBLIC_OPINION" jdbcType="VARCHAR" property="isPublicOpinion" />
+		<result column="OPINION_REQUIREMENT" jdbcType="VARCHAR" property="opinionRequirement" />
+		<result column="CREATOR_ID" jdbcType="DECIMAL" property="creatorId" />
+		<result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
+		<result column="MODIFIER_ID" jdbcType="DECIMAL" property="modifierId" />
+		<result column="MODIFY_DATE" jdbcType="TIMESTAMP" property="modifyDate" />
+	</resultMap>
+
+	<!-- 基础字段列表 -->
+	<sql id="BaseColumnList">
+		ID, INST_ID, INST_NAME, SUPER_INST_ID, SUPER_INST_NAME, CASE_CATEGORY, CASE_TYPE_ONE, CASE_TYPE_TWO,
+		CASE_TYPE_TWO_DESC, OUR_LITIGATION_SUBJECT, PLAINTIFF_NAME, DEFENDANT_NAME, CASE_CAUSE, CASE_CAUSE_DESC,
+		CASE_NO, CASE_DESC, INVOLVED_AMOUNT, LITIGATION_PHASE, LITIGATION_PHASE_DESC, LITIGATION_PROGRESS,
+		ARBITRATION_PHASE, ARBITRATION_PHASE_DESC, COURT_NAME, HANDLER_NAME, HANDLER_PHONE, APPLY_UNIT,
+		APPLICANT_NAME, APPLICANT_PHONE, CASE_REASON_PROCESS, IS_PUBLIC_OPINION, OPINION_REQUIREMENT,
+		CREATOR_ID, CREATE_DATE, MODIFIER_ID, MODIFY_DATE
+	</sql>
+</mapper>
