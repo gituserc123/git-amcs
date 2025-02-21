@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawDictTypeMapper">
+
+	<!-- 结果映射 -->
+	<resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawDictType">
+		<!-- 主键 -->
+		<id column="ID" jdbcType="DECIMAL" property="id" />
+		<!-- 其他字段 -->
+		<result column="TYPE_CODE" jdbcType="VARCHAR" property="typeCode" />
+		<result column="TYPE_DESC" jdbcType="VARCHAR" property="typeDesc" />
+		<result column="VALUE_CODE" jdbcType="VARCHAR" property="valueCode" />
+		<result column="VALUE_DESC" jdbcType="VARCHAR" property="valueDesc" />
+		<result column="FIRST_SPELL" jdbcType="VARCHAR" property="firstSpell" />
+		<result column="ORDERS" jdbcType="INTEGER" property="orders" />
+		<result column="USING_SIGN" jdbcType="INTEGER" property="usingSign" />
+		<result column="MODIFER" jdbcType="DECIMAL" property="modifer" />
+		<result column="MODIFY_DATE" jdbcType="TIMESTAMP" property="modifyDate" />
+		<result column="PARENT_ID" jdbcType="DECIMAL" property="parentId" />
+	</resultMap>
+
+	<!-- 基础字段列表 -->
+	<sql id="BaseColumnList">
+		ID, TYPE_CODE, TYPE_DESC, VALUE_CODE, VALUE_DESC, FIRST_SPELL, ORDERS, USING_SIGN,
+		MODIFER, MODIFY_DATE, PARENT_ID
+	</sql>
+
+	<!-- 查询单条记录 -->
+	<select id="selectById" resultMap="BaseResultMap">
+		SELECT
+		<include refid="BaseColumnList" />
+		FROM T_LAW_DICT_TYPE
+		WHERE ID = #{id}
+	</select>
+
+	<!-- 查询所有记录 -->
+	<select id="selectAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="BaseColumnList" />
+		FROM T_LAW_DICT_TYPE
+	</select>
+
+	<!-- 插入记录 -->
+	<insert id="insert" parameterType="com.aier.cloud.biz.service.biz.amcs.law.entity.LawDictType">
+		INSERT INTO T_LAW_DICT_TYPE (
+		ID, TYPE_CODE, TYPE_DESC, VALUE_CODE, VALUE_DESC, FIRST_SPELL, ORDERS, USING_SIGN,
+		MODIFER, MODIFY_DATE, PARENT_ID
+		) VALUES (
+		#{id}, #{typeCode}, #{typeDesc}, #{valueCode}, #{valueDesc}, #{firstSpell}, #{orders},
+		#{usingSign}, #{modifer}, #{modifyDate}, #{parentId}
+		)
+	</insert>
+
+	<!-- 更新记录 -->
+	<update id="updateById" parameterType="com.aier.cloud.biz.service.biz.amcs.law.entity.LawDictType">
+		UPDATE T_LAW_DICT_TYPE
+		<set>
+			<if test="typeCode != null">TYPE_CODE = #{typeCode},</if>
+			<if test="typeDesc != null">TYPE_DESC = #{typeDesc},</if>
+			<if test="valueCode != null">VALUE_CODE = #{valueCode},</if>
+			<if test="valueDesc != null">VALUE_DESC = #{valueDesc},</if>
+			<if test="firstSpell != null">FIRST_SPELL = #{firstSpell},</if>
+			<if test="orders != null">ORDERS = #{orders},</if>
+			<if test="usingSign != null">USING_SIGN = #{usingSign},</if>
+			<if test="modifer != null">MODIFER = #{modifer},</if>
+			<if test="modifyDate != null">MODIFY_DATE = #{modifyDate},</if>
+			<if test="parentId != null">PARENT_ID = #{parentId},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+
+	<!-- 删除记录 -->
+	<delete id="deleteById">
+		DELETE FROM T_LAW_DICT_TYPE
+		WHERE ID = #{id}
+	</delete>
+
+</mapper>

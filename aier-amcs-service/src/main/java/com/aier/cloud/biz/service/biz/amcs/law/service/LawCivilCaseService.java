@@ -4,6 +4,7 @@ import com.aier.cloud.biz.service.biz.amcs.law.entity.LawCivilCase;
 import com.baomidou.mybatisplus.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 民事诉讼仲裁案件主表 Service 接口
@@ -36,5 +37,7 @@ public interface LawCivilCaseService extends IService<LawCivilCase> {
      * @return 案件标签描述字符串
      */
     String findTagDescsById(Long caseId);
+
+    Object save(LawCivilCase lawCivilCase);
 
 }

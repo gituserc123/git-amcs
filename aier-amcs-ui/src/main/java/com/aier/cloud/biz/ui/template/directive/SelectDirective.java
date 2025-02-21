@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import com.aier.cloud.biz.ui.biz.fin.feign.FinDictFeignService;
+import com.aier.cloud.biz.ui.biz.law.feign.LawDictTypeFeignService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,9 @@ public class SelectDirective extends BaseSelectDirective {
 
 	@Autowired
 	private FinDictFeignService finDict;
+
+	@Autowired
+	private LawDictTypeFeignService lawDictTypeFeignService;
 	
 	@Resource EnumDictResovler r;
 	
@@ -68,6 +72,11 @@ public class SelectDirective extends BaseSelectDirective {
 			}else if(tag.startsWith("@fin@")){
 				tag = tag.replace("@fin@", "");
 				List<Map> list =  finDict.getList(tag);
+				list.sort(Comparator.comparing((Map h) -> (Integer.valueOf(String.valueOf(h.get("valueCode"))))));
+				return list;
+			}else if(tag.startsWith("@law@")){
+				tag = tag.replace("@law@", "");
+				List<Map> list =  lawDictTypeFeignService.selectByTypeCode(tag);
 				list.sort(Comparator.comparing((Map h) -> (Integer.valueOf(String.valueOf(h.get("valueCode"))))));
 				return list;
 			}else {

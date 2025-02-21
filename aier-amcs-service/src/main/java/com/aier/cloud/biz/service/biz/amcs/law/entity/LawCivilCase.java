@@ -23,11 +23,6 @@ public class LawCivilCase extends BaseEntity<LawCivilCase> {
 
     private static final long serialVersionUID = -4413922036810547519L;
 
-    /** 案件唯一标识，主键 */
-    @Comment(value = "案件唯一标识，主键")
-    @TableField(value = "id")
-    private Long id;
-
     /** 机构ID，关联医院或集团 */
     @Comment(value = "机构ID，关联医院或集团")
     @TableField(value = "inst_id")
@@ -180,25 +175,13 @@ public class LawCivilCase extends BaseEntity<LawCivilCase> {
 
     /** 创建者ID */
     @Comment(value = "创建者ID")
-    @TableField(value = "creator_id")
+    @TableField(value = "creator")
     @NotBlank
-    private Long creatorId;
+    private Long creator;
 
     /** 创建时间 */
     @Comment(value = "创建时间")
     @TableField(value = "create_date", fill = FieldFill.INSERT)
     @NotBlank
     private Date createDate;
-
-    /** 修改者ID */
-    @Comment(value = "修改者ID")
-    @TableField(value = "modifier_id")
-    @NotBlank
-    private Long modifierId;
-
-    /** 修改时间 */
-    @Comment(value = "修改时间")
-    @TableField(value = "modify_date", fill = FieldFill.INSERT_UPDATE)
-    @NotBlank
-    private Date modifyDate;
 }

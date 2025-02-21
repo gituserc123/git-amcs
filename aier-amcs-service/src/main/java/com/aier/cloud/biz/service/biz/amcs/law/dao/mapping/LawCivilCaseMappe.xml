@@ -38,9 +38,9 @@
 		<result column="CASE_REASON_PROCESS" jdbcType="VARCHAR" property="caseReasonProcess" />
 		<result column="IS_PUBLIC_OPINION" jdbcType="VARCHAR" property="isPublicOpinion" />
 		<result column="OPINION_REQUIREMENT" jdbcType="VARCHAR" property="opinionRequirement" />
-		<result column="CREATOR_ID" jdbcType="DECIMAL" property="creatorId" />
+		<result column="CREATOR" jdbcType="DECIMAL" property="creator" />
 		<result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
-		<result column="MODIFIER_ID" jdbcType="DECIMAL" property="modifierId" />
+		<result column="MODIFER" jdbcType="DECIMAL" property="modifer" />
 		<result column="MODIFY_DATE" jdbcType="TIMESTAMP" property="modifyDate" />
 	</resultMap>
 
@@ -51,6 +51,6 @@
 		CASE_NO, CASE_DESC, INVOLVED_AMOUNT, LITIGATION_PHASE, LITIGATION_PHASE_DESC, LITIGATION_PROGRESS,
 		ARBITRATION_PHASE, ARBITRATION_PHASE_DESC, COURT_NAME, HANDLER_NAME, HANDLER_PHONE, APPLY_UNIT,
 		APPLICANT_NAME, APPLICANT_PHONE, CASE_REASON_PROCESS, IS_PUBLIC_OPINION, OPINION_REQUIREMENT,
-		CREATOR_ID, CREATE_DATE, MODIFIER_ID, MODIFY_DATE
+		CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
 	</sql>
 </mapper>
