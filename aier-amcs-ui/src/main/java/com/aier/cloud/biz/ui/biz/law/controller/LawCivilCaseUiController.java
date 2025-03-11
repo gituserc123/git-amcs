@@ -1,36 +1,24 @@
 package com.aier.cloud.biz.ui.biz.law.controller;
 
-import com.aier.cloud.api.amcs.law.condition.LawAuditOpinionCondition;
 import com.aier.cloud.api.amcs.law.condition.LawCivilCaseCondition;
 import com.aier.cloud.api.amcs.law.domain.*;
-import com.aier.cloud.basic.api.domain.enums.FileEnum;
-import com.aier.cloud.basic.api.response.domain.file.FileInfo;
-import com.aier.cloud.basic.starter.ui.shiro.ShiroDbRealm;
-import com.aier.cloud.basic.web.shiro.ShiroUser;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.encrypt.service.AesEncryptStringService;
 import com.aier.cloud.biz.ui.biz.adverse.feign.FileService;
-import com.aier.cloud.biz.ui.biz.adverse.utils.FileValidator;
 import com.aier.cloud.biz.ui.biz.law.feign.LawAttachmentFeignService;
 import com.aier.cloud.biz.ui.biz.law.feign.LawAuditOpinionFeignService;
 import com.aier.cloud.biz.ui.biz.law.feign.LawCivilCaseFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
 import com.aier.cloud.biz.ui.biz.law.feign.LawNodeAuthFeignService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Maps;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/ui/amcs/law/civilCase")

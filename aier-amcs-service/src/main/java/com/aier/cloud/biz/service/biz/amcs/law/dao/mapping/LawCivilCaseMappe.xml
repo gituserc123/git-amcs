@@ -56,7 +56,7 @@
 
 	<select id="getAll" resultType="com.aier.cloud.biz.service.biz.amcs.law.entity.LawCivilCase">
 		SELECT
-		<include refid="BaseColumnList" />
+		tlcc.*
 		FROM T_LAW_CIVIL_CASE tlcc left join T_LAW_FLOW_INSTANCE tlf on tlcc.id = tlf.biz_id
 		where 1=1
 	</select>
