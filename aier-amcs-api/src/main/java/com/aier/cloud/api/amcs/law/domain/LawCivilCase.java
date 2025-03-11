@@ -120,5 +120,7 @@ public class LawCivilCase extends BaseEntity {
 
     private List<LawAttachment> attachs;
 
+    private String bizCode;
+
 
 }

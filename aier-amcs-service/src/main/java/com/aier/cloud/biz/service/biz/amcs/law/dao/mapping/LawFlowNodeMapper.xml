@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawFlowNodeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawFlowNode">
+        <id column="ID" property="id" />
+        <result column="FLOW_ID" property="flowId" />
+        <result column="NODE_ID" property="nodeId" />
+        <result column="NODE_CODE" property="nodeCode" />
+        <result column="NODE_NAME" property="nodeName" />
+        <result column="NODE_ORDER" property="nodeOrder" />
+        <result column="STEP_ORDER" property="stepOrder" />
+        <result column="NODE_TYPE" property="nodeType" />
+        <result column="CREATOR" property="creator" />
+        <result column="CREATE_DATE" property="createDate" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID, FLOW_ID, NODE_ID, NODE_CODE, NODE_NAME, NODE_ORDER, STEP_ORDER, NODE_TYPE, CREATOR, CREATE_DATE
+    </sql>
+</mapper>

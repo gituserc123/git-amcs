@@ -87,6 +87,14 @@
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
     }
+    .fix-init-btn {
+        width: 30px;
+        padding: 12px 6px;
+        white-space: inherit;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: 0;
+    }
     .toolbar {margin-right:7px;}
     .searchWapper {width: 520px; margin-left: 50px;}
 

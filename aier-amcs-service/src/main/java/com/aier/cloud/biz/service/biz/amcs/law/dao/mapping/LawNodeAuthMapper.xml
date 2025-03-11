@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawNodeAuthMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawNodeAuth">
+        <id column="ID" property="id" />
+        <result column="NODE_ID" property="nodeId" />
+        <result column="NODE_NAME" property="nodeName" />
+        <result column="NODE_CODE" property="nodeCode" />
+        <result column="STAFF_ID" property="staffId" />
+        <result column="STAFF_NAME" property="staffName" />
+        <result column="STAFF_INST_ID" property="staffInstId" />
+        <result column="STAFF_INST_NAME" property="staffInstName" />
+        <result column="STAFF_CODE" property="staffCode" />
+        <result column="CREATOR" property="creator" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="MODIFER" jdbcType="DECIMAL" property="modifer" />
+        <result column="MODIFY_DATE" jdbcType="TIMESTAMP" property="modifyDate" />
+        <result column="NODEIDS" property="nodeIds"/>
+        <result column="NODENAMES" property="nodeNames"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID, NODE_ID, NODE_NAME, NODE_CODE, STAFF_ID, STAFF_NAME, STAFF_CODE,STAFF_INST_ID, STAFF_INST_NAME, CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
+    </sql>
+
+    <select id="getAll" resultMap="BaseResultMap">
+        SELECT
+        STAFF_ID,
+        STAFF_NAME,
+        STAFF_CODE,
+        STAFF_INST_ID,
+        STAFF_INST_NAME,
+        LISTAGG(NODE_ID, ',') WITHIN GROUP (ORDER BY NODE_ID) AS nodeIds,
+        LISTAGG(TO_CHAR(NODE_NAME), ',') WITHIN GROUP (ORDER BY NODE_NAME) AS nodeNames
+        FROM AMCS.T_LAW_NODE_AUTH
+        where 1=1
+        <if test="cond.staffId != null and cond.staffId != ''">
+            and STAFF_ID = #{cond.staffId}
+        </if>
+        <if test="cond.staffName != null and cond.staffName != ''">
+            and STAFF_NAME like concat('%',concat(#{cond.staffName},'%'))
+        </if>
+        GROUP BY
+        STAFF_ID, STAFF_NAME,STAFF_CODE,STAFF_INST_ID,STAFF_INST_NAME
+    </select>
+
+</mapper>

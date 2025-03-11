@@ -4,6 +4,7 @@ import com.aier.cloud.api.amcs.law.condition.LawCivilCaseCondition;
 import com.aier.cloud.basic.starter.service.controller.BaseController;
 import com.aier.cloud.biz.service.biz.amcs.law.entity.LawCivilCase;
 import com.aier.cloud.biz.service.biz.amcs.law.service.LawCivilCaseService;
+import com.baomidou.mybatisplus.plugins.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -45,7 +46,8 @@ public class LawCivilCaseController extends BaseController {
     @ApiOperation(value = "根据条件查询民事诉讼仲裁案件列表")
     @RequestMapping(value = "/findListByCond", method = RequestMethod.POST)
     public @ResponseBody Object findListByCond(@RequestBody LawCivilCaseCondition condition) {
-        return null;
+        Page<Map<String, Object>> page = tranToPage(condition);
+        return returnPageResponse(page,lawCivilCaseService.getAll(page,condition));
     }
 
     /**

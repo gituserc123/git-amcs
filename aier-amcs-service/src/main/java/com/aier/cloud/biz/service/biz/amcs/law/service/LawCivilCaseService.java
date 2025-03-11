@@ -1,6 +1,8 @@
 package com.aier.cloud.biz.service.biz.amcs.law.service;
 
+import com.aier.cloud.api.amcs.law.condition.LawCivilCaseCondition;
 import com.aier.cloud.biz.service.biz.amcs.law.entity.LawCivilCase;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.IService;
 
 import java.util.List;
@@ -14,13 +16,15 @@ import java.util.Map;
  */
 public interface LawCivilCaseService extends IService<LawCivilCase> {
 
-    /**
+    List<Map<String, Object>> getAll(Page<Map<String, Object>> page, LawCivilCaseCondition cond);
+
+                                     /**
      * 根据案件ID查询案件标签列表
      *
      * @param caseId 案件ID
      * @return 案件标签列表
      */
-    List<LawCivilCase> findListByCaseId(Long caseId);
+                                     List<LawCivilCase> findListByCaseId(Long caseId);
 
     /**
      * 根据案件ID查询案件标签字符串

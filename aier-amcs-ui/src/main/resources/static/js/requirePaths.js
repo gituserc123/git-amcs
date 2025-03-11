@@ -17,6 +17,7 @@ require.config({
     'uploadImages':'plus/uploadImages.js?v=c6550',
     'vue':"lib/vue.2.7.8.min.js?v=c6550",
     'export' : 'plus/export.js?v=e1ff9',
+    'lawOpinionList':'app/law/lawOpinionList.js?v=c6551',
 
   },
   shim:{

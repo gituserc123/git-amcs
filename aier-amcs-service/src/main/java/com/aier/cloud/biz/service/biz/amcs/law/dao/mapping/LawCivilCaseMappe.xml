@@ -53,4 +53,11 @@
 		APPLICANT_NAME, APPLICANT_PHONE, CASE_REASON_PROCESS, IS_PUBLIC_OPINION, OPINION_REQUIREMENT,
 		CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
 	</sql>
+
+	<select id="getAll" resultType="com.aier.cloud.biz.service.biz.amcs.law.entity.LawCivilCase">
+		SELECT
+		<include refid="BaseColumnList" />
+		FROM T_LAW_CIVIL_CASE tlcc left join T_LAW_FLOW_INSTANCE tlf on tlcc.id = tlf.biz_id
+		where 1=1
+	</select>
 </mapper>
