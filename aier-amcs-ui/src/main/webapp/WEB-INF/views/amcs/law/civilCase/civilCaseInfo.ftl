@@ -126,9 +126,15 @@
                 <label class="lab-item">案件类型：</label>
                 [@ui_select  uiShowDefault=false id="caseTypeOne" name="caseTypeOne" tag="@law@case_type_one"  style="width:85%;" class="easyui-combobox" dataOptions="required:true,
                     onChange:((v)=>{
-                                $ajax.postSync('${base}/ui/amcs/law/dictType/selectSubDicts?typeCode=case_type_one&valueCode=' + v,null,false,false).done(function (rst) {
-                                    $('#caseTypeTwo').combobox('loadData', rst);
-                                });
+                        $ajax.postSync('${base}/ui/amcs/law/dictType/selectSubDicts?typeCode=case_type_one&valueCode=' + v,null,false,false).done(function (rst) {
+                            $('#caseTypeTwo').combobox('loadData', rst);
+                        });
+                        let caseTypeTwo = $('#caseTypeTwo').combobox('getValue');
+                        if(v=='9' && caseTypeTwo=='5'){
+                            $('#caseTypeTwoDesc').show();
+                        }else{
+                            $('#caseTypeTwoDesc').hide();
+                        }
                     })" filterkey="firstSpell"/]
             </div>
         </div>

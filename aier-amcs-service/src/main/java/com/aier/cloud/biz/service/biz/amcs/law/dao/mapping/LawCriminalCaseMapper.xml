@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawCriminalCaseMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.api.amcs.law.domain.LawCriminalCase">
+        <!-- 主键 -->
+        <id column="ID" jdbcType="DECIMAL" property="id" />
+
+        <!-- 基础信息 -->
+        <result column="INST_ID" jdbcType="DECIMAL" property="instId" />
+        <result column="INST_NAME" jdbcType="VARCHAR" property="instName" />
+        <result column="SUPER_INST_ID" jdbcType="DECIMAL" property="superInstId" />
+        <result column="SUPER_INST_NAME" jdbcType="VARCHAR" property="superInstName" />
+        <result column="STATUS" jdbcType="DECIMAL" property="status" />
+
+        <!-- 案件主体信息 -->
+        <result column="SUSPECT_NAME" jdbcType="VARCHAR" property="suspectName" />
+        <result column="HANDLING_PSB" jdbcType="VARCHAR" property="handlingPsb" />
+        <result column="PROSECUTOR_OFFICE" jdbcType="VARCHAR" property="prosecutorOffice" />
+        <result column="COURT_NAME" jdbcType="VARCHAR" property="courtName" />
+
+        <!-- 案件类型与罪名 -->
+        <result column="CASE_TYPE" jdbcType="VARCHAR" property="caseType" />
+        <result column="CHARGE_NAME" jdbcType="VARCHAR" property="chargeName" />
+        <result column="CHARGE_NAME_DESC" jdbcType="VARCHAR" property="chargeNameDesc" />
+        <result column="CASE_NO" jdbcType="VARCHAR" property="caseNo" />
+
+        <!-- 案件详情 -->
+        <result column="CASE_DESC" jdbcType="VARCHAR" property="caseDesc" />
+        <result column="INVOLVED_AMOUNT" jdbcType="DECIMAL" property="involvedAmount" />
+        <result column="LITIGATION_PHASE" jdbcType="VARCHAR" property="litigationPhase" />
+        <result column="CURRENT_STATUS" jdbcType="VARCHAR" property="currentStatus" />
+        <result column="REMARKS" jdbcType="VARCHAR" property="remarks" />
+
+        <!-- 审计字段 -->
+        <result column="CREATOR" jdbcType="DECIMAL" property="creator" />
+        <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
+        <result column="MODIFER" jdbcType="DECIMAL" property="modifer" />
+        <result column="MODIFY_DATE" jdbcType="TIMESTAMP" property="modifyDate" />
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="BaseColumnList">
+        ID, INST_ID, INST_NAME, SUPER_INST_ID, SUPER_INST_NAME, STATUS, SUSPECT_NAME,
+        HANDLING_PSB, PROSECUTOR_OFFICE, COURT_NAME, CASE_TYPE, CHARGE_NAME,
+        CHARGE_NAME_DESC, CASE_NO, CASE_DESC, INVOLVED_AMOUNT, LITIGATION_PHASE,
+        CURRENT_STATUS, REMARKS, CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
+    </sql>
+
+    <!-- 基础查询示例 -->
+    <select id="getAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumnList" />
+        FROM T_LAW_CRIMINAL_CASE
+    </select>
+
+</mapper>

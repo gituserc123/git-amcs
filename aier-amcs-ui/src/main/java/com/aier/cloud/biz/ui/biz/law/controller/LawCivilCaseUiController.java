@@ -3,13 +3,8 @@ package com.aier.cloud.biz.ui.biz.law.controller;
 import com.aier.cloud.api.amcs.law.condition.LawCivilCaseCondition;
 import com.aier.cloud.api.amcs.law.domain.*;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
-import com.aier.cloud.biz.encrypt.service.AesEncryptStringService;
-import com.aier.cloud.biz.ui.biz.adverse.feign.FileService;
-import com.aier.cloud.biz.ui.biz.law.feign.LawAttachmentFeignService;
-import com.aier.cloud.biz.ui.biz.law.feign.LawAuditOpinionFeignService;
 import com.aier.cloud.biz.ui.biz.law.feign.LawCivilCaseFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
-import com.aier.cloud.biz.ui.biz.law.feign.LawNodeAuthFeignService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
@@ -27,24 +22,8 @@ public class LawCivilCaseUiController extends LawBaseUiController {
     @Autowired
     private LawCivilCaseFeignService lawCivilCaseFeignService;
 
-    @Autowired
-    private AesEncryptStringService aesEncryptStringService;
-
-    @Autowired
-    private LawAttachmentFeignService lawAttachmentFeignService;
-
-    @Autowired
-    private LawNodeAuthFeignService lawNodeAuthFeignService;
-
-    @Autowired
-    private LawAuditOpinionFeignService lawAuditOpinionFeignService;
-
-    @Autowired
-    private FileService fs;
-
     private static final String CIVIL_CASE_INFO = "amcs/law/civilCase/civilCaseInfo";
     private static final String CIVIL_CASE_LIST = "amcs/law/civilCase/civilCaseList";
-    private static final String EDIT_CIVIL_CASE = "amcs/law/civilCase/editCivilCase";
 
 
     @RequestMapping(value = "/listPage")
@@ -64,7 +43,6 @@ public class LawCivilCaseUiController extends LawBaseUiController {
      */
     @RequestMapping(value = "/info", method = {RequestMethod.GET, RequestMethod.POST})
     public String civilCaseList(HttpServletRequest request,Long bizId) {
-        //ShiroUser shiroUser = ShiroUtils.getSessionAttr(ShiroDbRealm.LOGIN_USER);
         LawCivilCase lawCivilCase = new LawCivilCase();
         if(Objects.nonNull(bizId) && bizId.longValue()>0){
             lawCivilCase = lawCivilCaseFeignService.getLawCivilCase(bizId);
