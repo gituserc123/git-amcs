@@ -42,8 +42,13 @@ public class LawManageUiController extends LawBaseUiController {
         criminalCase.put("lawTitle", "法务填报");
         criminalCase.put("lawUrl", "ui/amcs/law/criminalCase/info");
         criminalCase.put("lawName", "刑事案件");
+        Map<String, Object> adminPenalty = Maps.newHashMap();
+        adminPenalty.put("lawTitle", "法务填报");
+        adminPenalty.put("lawUrl", "ui/amcs/law/adminPenalty/info");
+        adminPenalty.put("lawName", "行政处罚");
         list.add(all);
         list.add(criminalCase);
+        list.add(adminPenalty);
         return list;
     }
 

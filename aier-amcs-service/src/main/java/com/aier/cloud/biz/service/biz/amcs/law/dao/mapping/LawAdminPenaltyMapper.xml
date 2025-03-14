@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawAdminPenaltyMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawAdminPenalty">
+        <!-- 主键 -->
+        <id column="ID" jdbcType="DECIMAL" property="id"/>
+
+        <!-- 其他字段 -->
+        <result column="INST_ID" jdbcType="DECIMAL" property="instId"/>
+        <result column="INST_NAME" jdbcType="NVARCHAR" property="instName"/>
+        <result column="SUPER_INST_ID" jdbcType="DECIMAL" property="superInstId"/>
+        <result column="SUPER_INST_NAME" jdbcType="NVARCHAR" property="superInstName"/>
+        <result column="STATUS" jdbcType="DECIMAL" property="status"/>
+        <result column="PARTY_NAME" jdbcType="NVARCHAR" property="partyName"/>
+        <result column="AUTHORITY_NAME" jdbcType="NVARCHAR" property="authorityName"/>
+        <result column="PENALIZED_UNIT" jdbcType="NVARCHAR" property="penalizedUnit"/>
+        <result column="DOCUMENT_TYPE" jdbcType="DECIMAL" property="documentType"/>
+        <result column="DOCUMENT_TYPE_OTHER" jdbcType="NVARCHAR" property="documentTypeOther"/>
+        <result column="DOCUMENT_NO" jdbcType="NVARCHAR" property="documentNo"/>
+        <result column="FILING_DATE" jdbcType="DATE" property="filingDate"/>
+        <result column="PENALTY_DATE" jdbcType="DATE" property="penaltyDate"/>
+        <result column="RECEIVE_DATE" jdbcType="DATE" property="receiveDate"/>
+        <result column="CASE_NAME" jdbcType="NVARCHAR" property="caseName"/>
+        <result column="PENALTY_REASON" jdbcType="DECIMAL" property="penaltyReason"/>
+        <result column="PENALTY_REASON_OTHER" jdbcType="NVARCHAR" property="penaltyReasonOther"/>
+        <result column="PENALTY_CATEGORY" jdbcType="DECIMAL" property="penaltyCategory"/>
+        <result column="PENALTY_CATEGORY_OTHER" jdbcType="NVARCHAR" property="penaltyCategoryOther"/>
+        <result column="PENALTY_BASIS" jdbcType="NVARCHAR" property="penaltyBasis"/>
+        <result column="PENALTY_MEASURES" jdbcType="NVARCHAR" property="penaltyMeasures"/>
+        <result column="CASE_BACKGROUND" jdbcType="NVARCHAR" property="caseBackground"/>
+        <result column="CASE_PROCESS" jdbcType="NVARCHAR" property="caseProcess"/>
+        <result column="INVOLVED_AMOUNT" jdbcType="DECIMAL" property="involvedAmount"/>
+        <result column="CURRENT_STATUS" jdbcType="NVARCHAR" property="currentStatus"/>
+        <result column="REMARKS" jdbcType="NVARCHAR" property="remarks"/>
+        <result column="APPLY_UNIT" jdbcType="NVARCHAR" property="applyUnit"/>
+        <result column="APPLICANT_NAME" jdbcType="NVARCHAR" property="applicantName"/>
+        <result column="APPLICANT_PHONE" jdbcType="NVARCHAR" property="applicantPhone"/>
+        <result column="HANDLING_MEASURES" jdbcType="NVARCHAR" property="handlingMeasures"/>
+        <result column="IS_PUBLIC_OPINION" jdbcType="NVARCHAR" property="isPublicOpinion"/>
+        <result column="OPINION_REQUIREMENT" jdbcType="NVARCHAR" property="opinionRequirement"/>
+        <result column="CREATOR" jdbcType="DECIMAL" property="creator"/>
+        <result column="CREATE_DATE" jdbcType="DATE" property="createDate"/>
+        <result column="MODIFER" jdbcType="DECIMAL" property="modifer"/>
+        <result column="MODIFY_DATE" jdbcType="DATE" property="modifyDate"/>
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="BaseColumnList">
+        ID, INST_ID, INST_NAME, SUPER_INST_ID, SUPER_INST_NAME, STATUS, PARTY_NAME,
+        AUTHORITY_NAME, PENALIZED_UNIT, DOCUMENT_TYPE, DOCUMENT_TYPE_OTHER, DOCUMENT_NO,
+        FILING_DATE, PENALTY_DATE, RECEIVE_DATE, CASE_NAME, PENALTY_REASON,
+        PENALTY_REASON_OTHER, PENALTY_CATEGORY, PENALTY_CATEGORY_OTHER, PENALTY_BASIS,
+        PENALTY_MEASURES, CASE_BACKGROUND, CASE_PROCESS, INVOLVED_AMOUNT, CURRENT_STATUS,
+        REMARKS, APPLY_UNIT, APPLICANT_NAME, APPLICANT_PHONE, HANDLING_MEASURES,
+        IS_PUBLIC_OPINION, OPINION_REQUIREMENT, CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
+    </sql>
+
+    <select id="getAll" resultType="com.aier.cloud.biz.service.biz.amcs.law.entity.LawAdminPenalty">
+        SELECT
+        tlap.*
+        FROM T_LAW_ADMIN_PENALTY tlap
+        WHERE 1=1
+    </select>
+</mapper>

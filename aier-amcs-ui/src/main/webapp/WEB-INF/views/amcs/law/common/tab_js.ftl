@@ -48,10 +48,13 @@
 
     // 附件上传
     $('.s-op-upload').click(function () {
+        let formData = $('.commonDataForm').sovals();
         var attachCode = $(this).attr('rel');
         // 将row.id传递给上传组件
         upload.options.formData = {
             bizId: '${bizId!}',
+            bizCode: formData.bizCode,
+            bizType: formData.bizType,
             attachCode: attachCode
         };
         $('#fileUrlDiv').find('input').click();

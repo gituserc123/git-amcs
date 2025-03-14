@@ -50,6 +50,7 @@
         <input type="hidden" id="saveUrl" name="saveUrl" value="${base}/ui/amcs/law/criminalCase/save">
         <input type="hidden" id="initCommitUrl" name="initCommitUrl" value="${base}/ui/amcs/law/criminalCase/initCommit">
         <input type="hidden" id="flowCommitUrl" name="flowCommitUrl" value="${base}/ui/amcs/law/criminalCase/flowCommit">
+        <input type="hidden" id="bizType" name="bizType" value="2" />
         <input type="hidden" id="bizCode" name="bizCode" value="CRIMINAL_CASE">
         <input type="hidden" id="tabWindowTitle" name="tabWindowTitle" value="刑事案件">
 

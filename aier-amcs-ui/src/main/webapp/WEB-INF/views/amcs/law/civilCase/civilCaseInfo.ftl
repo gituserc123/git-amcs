@@ -50,6 +50,7 @@
     <input type="hidden" id="saveUrl" name="saveUrl" value="${base}/ui/amcs/law/civilCase/save" />
     <input type="hidden" id="initCommitUrl" name="initCommitUrl" value="${base}/ui/amcs/law/civilCase/initCommit" />
     <input type="hidden" id="flowCommitUrl" name="flowCommitUrl" value="${base}/ui/amcs/law/civilCase/flowCommit" />
+    <input type="hidden" id="bizType" name="bizType" value="1" />
     <input type="hidden" id="bizCode" name="bizCode" value="CIVIL_CASE" />
     <input type="hidden" id="tabWindowTitle" name="tabWindowTitle" value="民事诉讼仲裁案" />
 

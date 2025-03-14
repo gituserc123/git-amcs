@@ -66,6 +66,8 @@ public class LawBaseUiController extends BaseController {
     @PostMapping(value = "/upload")
     @ResponseBody
     public Object upload(@RequestParam("bizId") Long bizId,
+                         @RequestParam("bizType") String bizType,
+                         @RequestParam("bizCode") String bizCode,
                          @RequestParam("attachCode") String attachCode,
                          @RequestParam("file") MultipartFile file) {
         //判断文件是否包含脚步
@@ -90,8 +92,8 @@ public class LawBaseUiController extends BaseController {
 
             if(Objects.nonNull(bizId) && bizId.longValue()>0){
                 LawAttachment lawAttachment = new LawAttachment();
-                lawAttachment.setBizType("1");
-                lawAttachment.setBizCode("CIVIL_CASE");
+                lawAttachment.setBizType(bizType);
+                lawAttachment.setBizCode(bizCode);
                 lawAttachment.setBizId(bizId);
                 lawAttachment.setFileName(file.getOriginalFilename());
                 lawAttachment.setFileType(file.getContentType());
