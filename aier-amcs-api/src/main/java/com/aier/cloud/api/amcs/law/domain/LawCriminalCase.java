@@ -77,4 +77,6 @@ public class LawCriminalCase extends BaseEntity {
     private List<LawAttachment> attachs;
 
     private String bizCode;
+
+    private String bizType;
 }

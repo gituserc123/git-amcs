@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawDisputeMatterMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawDisputeMatter">
+        <id column="ID" jdbcType="DECIMAL" property="id"/>
+        <result column="INST_ID" jdbcType="DECIMAL" property="instId"/>
+        <result column="INST_NAME" jdbcType="NVARCHAR" property="instName"/>
+        <result column="SUPER_INST_ID" jdbcType="DECIMAL" property="superInstId"/>
+        <result column="SUPER_INST_NAME" jdbcType="NVARCHAR" property="superInstName"/>
+        <result column="STATUS" jdbcType="DECIMAL" property="status"/>
+        <result column="OPPONENT_FULL_NAME" jdbcType="NVARCHAR" property="opponentFullName"/>
+        <result column="OUR_FULL_NAME" jdbcType="NVARCHAR" property="ourFullName"/>
+        <result column="APPLY_UNIT" jdbcType="NVARCHAR" property="applyUnit"/>
+        <result column="APPLICANT_NAME" jdbcType="NVARCHAR" property="applicantName"/>
+        <result column="APPLICANT_PHONE" jdbcType="NVARCHAR" property="applicantPhone"/>
+        <result column="DISPUTE_CAUSE_PROCESS" jdbcType="NVARCHAR" property="disputeCauseProcess"/>
+        <result column="IS_PUBLIC_OPINION" jdbcType="NVARCHAR" property="isPublicOpinion"/>
+        <result column="OPINION_DEVELOPMENT" jdbcType="NVARCHAR" property="opinionDevelopment"/>
+        <result column="HANDLING_MEASURES" jdbcType="NVARCHAR" property="handlingMeasures"/>
+        <result column="OPINION_REQUIREMENT" jdbcType="NVARCHAR" property="opinionRequirement"/>
+        <result column="CREATOR" jdbcType="DECIMAL" property="creator"/>
+        <result column="CREATE_DATE" jdbcType="DATE" property="createDate"/>
+        <result column="MODIFER" jdbcType="DECIMAL" property="modifer"/>
+        <result column="MODIFY_DATE" jdbcType="DATE" property="modifyDate"/>
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="BaseColumnList">
+        ID, INST_ID, INST_NAME, SUPER_INST_ID, SUPER_INST_NAME, STATUS,
+        OPPONENT_FULL_NAME, OUR_FULL_NAME, APPLY_UNIT, APPLICANT_NAME,
+        APPLICANT_PHONE, DISPUTE_CAUSE_PROCESS, IS_PUBLIC_OPINION,
+        OPINION_DEVELOPMENT, HANDLING_MEASURES, OPINION_REQUIREMENT,
+        CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
+    </sql>
+
+    <!-- 通用查询条件 -->
+    <sql id="BaseWhereClause">
+        <where>
+            <if test="cond.startDate != null">
+                AND tldm.CREATE_DATE >= #{cond.startDate}
+            </if>
+            <if test="cond.endDate != null">
+                AND tldm.CREATE_DATE &lt;= #{cond.endDate}
+            </if>
+            <if test="cond.status != null">
+                AND tldm.STATUS = #{cond.status}
+            </if>
+            <if test="cond.instId != null">
+                AND tldm.INST_ID = #{cond.instId}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="getAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumnList"/>
+        FROM T_LAW_DISPUTE_MATTER tldm
+        <include refid="BaseWhereClause"/>
+        ORDER BY tldm.CREATE_DATE DESC
+    </select>
+
+    <!-- 机构维度查询 -->
+    <select id="selectByInstId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumnList"/>
+        FROM T_LAW_DISPUTE_MATTER
+        WHERE INST_ID = #{instId}
+    </select>
+
+</mapper>

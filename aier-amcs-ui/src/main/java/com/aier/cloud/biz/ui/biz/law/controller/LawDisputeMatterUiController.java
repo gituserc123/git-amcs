@@ -1,11 +1,11 @@
 package com.aier.cloud.biz.ui.biz.law.controller;
 
-import com.aier.cloud.api.amcs.law.condition.LawAdminPenaltyCondition;
-import com.aier.cloud.api.amcs.law.domain.LawAdminPenalty;
+import com.aier.cloud.api.amcs.law.condition.LawDisputeMatterCondition;
+import com.aier.cloud.api.amcs.law.domain.LawDisputeMatter;
 import com.aier.cloud.api.amcs.law.domain.LawFlowInstance;
 import com.aier.cloud.api.amcs.law.domain.LawFlowNode;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
-import com.aier.cloud.biz.ui.biz.law.feign.LawAdminPenaltyFeignService;
+import com.aier.cloud.biz.ui.biz.law.feign.LawDisputeMatterFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.MapUtils;
@@ -18,94 +18,94 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Controller
-@RequestMapping("/ui/amcs/law/adminPenalty")
-public class LawAdminPenaltyUiController extends LawBaseUiController {
+@RequestMapping("/ui/amcs/law/disputeMatter")
+public class LawDisputeMatterUiController extends LawBaseUiController {
 
     @Autowired
-    private LawAdminPenaltyFeignService lawAdminPenaltyFeignService;
+    private LawDisputeMatterFeignService lawDisputeMatterFeignService;
 
-    private static final String ADMIN_PENALTY_INFO = "amcs/law/adminPenalty/adminPenaltyInfo";
-    private static final String ADMIN_PENALTY_LIST = "amcs/law/adminPenalty/adminPenaltyList";
+    private static final String DISPUTE_MATTER_INFO = "amcs/law/disputeMatter/disputeMatterInfo";
+    private static final String DISPUTE_MATTER_LIST = "amcs/law/disputeMatter/disputeMatterList";
 
     @RequestMapping(value = "/listPage")
     public String listPage(HttpServletRequest request) {
-        return ADMIN_PENALTY_LIST;
+        return DISPUTE_MATTER_LIST;
     }
 
-    @RequestMapping(value = "/queryAdminPenaltyList", method = { RequestMethod.POST })
+    @RequestMapping(value = "/queryDisputeMatterList", method = { RequestMethod.POST })
     @ResponseBody
-    public PageResponse<Map<String, Object>> queryAdminPenaltyList() {
-        LawAdminPenaltyCondition cond = new LawAdminPenaltyCondition();
-        return lawAdminPenaltyFeignService.findListByCond(cond);
+    public PageResponse<Map<String, Object>> queryDisputeMatterList() {
+        LawDisputeMatterCondition cond = new LawDisputeMatterCondition();
+        return lawDisputeMatterFeignService.findListByCond(cond);
     }
 
     /**
-     * 行政处罚事项信息页面
+     * 纠纷事项信息页面
      */
     @RequestMapping(value = "/info", method = { RequestMethod.GET, RequestMethod.POST })
-    public String adminPenaltyInfo(HttpServletRequest request, Long bizId) {
-        LawAdminPenalty lawAdminPenalty = new LawAdminPenalty();
+    public String disputeMatterInfo(HttpServletRequest request, Long bizId) {
+        LawDisputeMatter lawDisputeMatter = new LawDisputeMatter();
         if (Objects.nonNull(bizId) && bizId.longValue() > 0) {
-            lawAdminPenalty = lawAdminPenaltyFeignService.getLawAdminPenalty(bizId);
+            lawDisputeMatter = lawDisputeMatterFeignService.getLawDisputeMatter(bizId);
         }
-        infoHandler(request, bizId, lawAdminPenalty.getInstId(), lawAdminPenalty);
-        return ADMIN_PENALTY_INFO;
+        infoHandler(request, bizId, lawDisputeMatter.getInstId(), lawDisputeMatter);
+        return DISPUTE_MATTER_INFO;
     }
 
     /**
-     * 查询行政处罚事项分页数据
+     * 查询纠纷事项分页数据
      */
     @RequestMapping(value = "/getAll", method = { RequestMethod.GET, RequestMethod.POST })
     @ResponseBody
-    public PageResponse<Map<String, Object>> getAll(LawAdminPenaltyCondition cond) {
+    public PageResponse<Map<String, Object>> getAll(LawDisputeMatterCondition cond) {
         PageResponse<Map<String, Object>> result = new PageResponse<>();
         return result;
     }
 
     /**
-     * 查询所有行政处罚事项实体数据
+     * 查询所有纠纷事项实体数据
      */
     @RequestMapping(value = "/getAllEntity", method = { RequestMethod.GET, RequestMethod.POST })
     @ResponseBody
-    public List<Map<String, Object>> getAllEntity(LawAdminPenaltyCondition cond) {
+    public List<Map<String, Object>> getAllEntity(LawDisputeMatterCondition cond) {
         List<Map<String, Object>> list = Lists.newArrayList();
         return list;
     }
 
     /**
-     * 保存或更新行政处罚事项信息
+     * 保存或更新纠纷事项信息
      */
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
-    public Object save(@RequestBody LawAdminPenalty lawAdminPenalty) {
+    public Object save(@RequestBody LawDisputeMatter lawDisputeMatter) {
         boolean saveAttachFlag = false;
-        if (Objects.isNull(lawAdminPenalty.getId())) {
+        if (Objects.isNull(lawDisputeMatter.getId())) {
             saveAttachFlag = true;
         }
-        Map<String, Object> result = lawAdminPenaltyFeignService.save(lawAdminPenalty);
-        Long adminPenaltyId = MapUtils.getLong(result, "adminPenaltyId");
-        saveHandler(adminPenaltyId, lawAdminPenalty.getBizType(), lawAdminPenalty.getBizCode(), saveAttachFlag, lawAdminPenalty.getAttachs());
-        return success(MapUtils.getString(result, "msg"), "bizId", adminPenaltyId);
+        Map<String, Object> result = lawDisputeMatterFeignService.save(lawDisputeMatter);
+        Long disputeMatterId = MapUtils.getLong(result, "disputeMatterId");
+        saveHandler(disputeMatterId, lawDisputeMatter.getBizType(), lawDisputeMatter.getBizCode(), saveAttachFlag, lawDisputeMatter.getAttachs());
+        return success(MapUtils.getString(result, "msg"), "bizId", disputeMatterId);
     }
 
     /**
      * 初始流程提交
      *
-     * @param lawAdminPenalty
+     * @param lawDisputeMatter
      * @return
      */
     @RequestMapping(value = "/initCommit", method = RequestMethod.POST)
     @ResponseBody
-    public Object initCommit(@RequestBody LawAdminPenalty lawAdminPenalty) {
+    public Object initCommit(@RequestBody LawDisputeMatter lawDisputeMatter) {
         // 1.保存业务信息
-        Map<String, Object> result = (Map<String, Object>) this.save(lawAdminPenalty);
+        Map<String, Object> result = (Map<String, Object>) this.save(lawDisputeMatter);
         // 2.判断选取流程信息表中哪个流程
         Long flowId = getFlowId();
         // 3.保存流程实例信息
-        Long adminPenaltyId = MapUtils.getLong(result, "bizId");
-        LawFlowInstance lawFlowInstance = createFlowInstance(flowId, adminPenaltyId, lawAdminPenalty.getBizCode(), 1, "行政处罚事项");
+        Long disputeMatterId = MapUtils.getLong(result, "bizId");
+        LawFlowInstance lawFlowInstance = createFlowInstance(flowId, disputeMatterId, lawDisputeMatter.getBizCode(), 1, "纠纷事项");
         // 4.更新session中的流程实例信息
-        ShiroUtils.removeSessionAttr("SessionLawFlowInstance_" + adminPenaltyId);
+        ShiroUtils.removeSessionAttr("SessionLawFlowInstance_" + disputeMatterId);
         // 5.保存流程明细表信息
         addLawDetailInfo(lawFlowInstance, "SUBMIT");
         // 6.更新session中的流程明细信息
@@ -125,18 +125,18 @@ public class LawAdminPenaltyUiController extends LawBaseUiController {
     public Object flowCommit(@RequestBody Map<String, Object> dataMaps) {
         JSONObject data = (JSONObject) dataMaps.get("bizForm");
         String opinion = MapUtils.getString(dataMaps, "opinion");
-        LawAdminPenalty lawAdminPenalty = data.toJavaObject(LawAdminPenalty.class);
-        Map<String, Object> retMaps = processFlow(lawAdminPenalty.getId(), opinion, "SUBMIT");
+        LawDisputeMatter lawDisputeMatter = data.toJavaObject(LawDisputeMatter.class);
+        Map<String, Object> retMaps = processFlow(lawDisputeMatter.getId(), opinion, "SUBMIT");
         if (MapUtils.getBoolean(retMaps, "saveFlag")) {
-            this.save(lawAdminPenalty);
+            this.save(lawDisputeMatter);
         }
         // TODO 如果当前机构不存在抄送节点所授权的人员，怎么办？
-        LawFlowInstance lawFlowInstance = getFlowInstanceByBizId(lawAdminPenalty.getId());
+        LawFlowInstance lawFlowInstance = getFlowInstanceByBizId(lawDisputeMatter.getId());
         List<LawFlowNode> lawFlowNodes = getFlowNodeByFlowId(lawFlowInstance.getFlowId());
         LawFlowNode currentNode = lawFlowNodes.stream().filter(node -> node.getNodeId().longValue() == Long.valueOf(lawFlowInstance.getCurrentNode()).longValue()).findFirst().get();
         if (currentNode.getNodeType().equals("CC")) {
             // 抄送节点
-            processFlow(lawAdminPenalty.getId(), null, "CC");
+            processFlow(lawDisputeMatter.getId(), null, "CC");
         }
         return success();
     }

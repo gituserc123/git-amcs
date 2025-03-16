@@ -83,7 +83,7 @@ public class LawCivilCaseUiController extends LawBaseUiController {
         }
         Map<String,Object> result = lawCivilCaseFeignService.save(lawCivilCase);
         Long civilCaseId = MapUtils.getLong(result,"civilCaseId");
-        saveHandler(civilCaseId,"1",lawCivilCase.getBizCode(),saveAttachFlag,lawCivilCase.getAttachs());
+        saveHandler(civilCaseId,lawCivilCase.getBizType(),lawCivilCase.getBizCode(),saveAttachFlag,lawCivilCase.getAttachs());
         return success(MapUtils.getString(result,"msg"),"bizId",civilCaseId);
     }
 

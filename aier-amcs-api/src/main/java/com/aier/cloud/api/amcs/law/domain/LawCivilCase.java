@@ -122,5 +122,7 @@ public class LawCivilCase extends BaseEntity {
 
     private String bizCode;
 
+    private String bizType;
+
 
 }

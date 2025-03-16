@@ -24,6 +24,8 @@ public class LawManageUiController extends LawBaseUiController {
 
     private static final String NODE_AUTH_EDIT = "amcs/law/lawManage/editNodeAuth";
 
+    private static final String LAW_LIST_TAB = "amcs/law/lawManage/lawListTab";
+
 
     @RequestMapping(value = "/lawChoose",method = { RequestMethod.GET, RequestMethod.POST})
     public String lawChoose(HttpServletRequest request, Model model){
@@ -46,9 +48,14 @@ public class LawManageUiController extends LawBaseUiController {
         adminPenalty.put("lawTitle", "法务填报");
         adminPenalty.put("lawUrl", "ui/amcs/law/adminPenalty/info");
         adminPenalty.put("lawName", "行政处罚");
+        Map<String, Object> disputeMatter = Maps.newHashMap();
+        disputeMatter.put("lawTitle", "法务填报");
+        disputeMatter.put("lawUrl", "ui/amcs/law/disputeMatter/info");
+        disputeMatter.put("lawName", "纠纷事项");
         list.add(all);
         list.add(criminalCase);
         list.add(adminPenalty);
+        list.add(disputeMatter);
         return list;
     }
 
@@ -86,6 +93,11 @@ public class LawManageUiController extends LawBaseUiController {
     public @ResponseBody Map<String, Object> saveNodeAuth(@RequestBody Map<String, Object> mData){
         saveNodeAuthFromPage(mData);
         return success();
+    }
+
+    @RequestMapping(value = "/lawListTab", method = { RequestMethod.GET, RequestMethod.POST })
+    public String dfInfoPage(Map<String, Object> map) {
+        return LAW_LIST_TAB;
     }
 
 }

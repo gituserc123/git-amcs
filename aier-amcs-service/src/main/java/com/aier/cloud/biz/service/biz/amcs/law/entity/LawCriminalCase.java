@@ -2,7 +2,6 @@ package com.aier.cloud.biz.service.biz.amcs.law.entity;
 
 import com.aier.cloud.basic.core.base.BaseEntity;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.aier.cloud.biz.service.biz.amcs.adverse.aop.Comment;
 import lombok.Data;

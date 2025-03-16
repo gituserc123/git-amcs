@@ -14,7 +14,7 @@
                 $ajax.post({
                     url: '${base}/ui/amcs/law/baseui/deleteAttach?fileId=' + fileId + '&filePath=' + filePath + '&bizId=' + '${bizId!}',
                     jsonData: true,
-                    tip: '你确定删除此附件吗？',
+                    // tip: '你确定删除此附件吗？',
                     callback: function (rst) {
                         $grid.reload('#gridBox');
                     }
