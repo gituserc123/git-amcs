@@ -166,15 +166,17 @@ public class LawBaseUiController extends BaseController {
     public Object getLawOpinionList(@RequestParam("bizId") Long bizId){
         List<LawAuditOpinion> opinions = Lists.newArrayList();
         LawFlowInstance lawFlowInstance = getFlowInstanceByBizId(bizId);
-        List<LawFlowNode> lawFlowNodes = getFlowNodeByFlowId(lawFlowInstance.getFlowId());
-        List<LawAuditDetail> auditDetails = getAuditDetailByInstanceId(lawFlowInstance.getId());
-        if(CollectionUtils.isNotEmpty(auditDetails) && auditDetails.size()>0){
-            auditDetails.stream().forEach(ad -> ad.setNodeName(lawFlowNodes.stream().filter(node -> node.getNodeId().longValue() == ad.getNodeId().longValue()).findFirst().get().getNodeName()));
-            LawAuditOpinionCondition cond = new LawAuditOpinionCondition();
-            cond.setDetailIds(auditDetails.stream().map(LawAuditDetail::getId).collect(Collectors.toList()));
-            opinions = lawAuditOpinionFeignService.getListByDetailIds(cond);
-            if(CollectionUtils.isNotEmpty(opinions) && opinions.size()>0){
-                opinions.stream().forEach(on -> on.setNodeName(auditDetails.stream().filter(ad -> ad.getId().longValue() == on.getDetailId().longValue()).findFirst().get().getNodeName()));
+        if(Objects.nonNull(lawFlowInstance)){
+            List<LawFlowNode> lawFlowNodes = getFlowNodeByFlowId(lawFlowInstance.getFlowId());
+            List<LawAuditDetail> auditDetails = getAuditDetailByInstanceId(lawFlowInstance.getId());
+            if(CollectionUtils.isNotEmpty(auditDetails) && auditDetails.size()>0){
+                auditDetails.stream().forEach(ad -> ad.setNodeName(lawFlowNodes.stream().filter(node -> node.getNodeId().longValue() == ad.getNodeId().longValue()).findFirst().get().getNodeName()));
+                LawAuditOpinionCondition cond = new LawAuditOpinionCondition();
+                cond.setDetailIds(auditDetails.stream().map(LawAuditDetail::getId).collect(Collectors.toList()));
+                opinions = lawAuditOpinionFeignService.getListByDetailIds(cond);
+                if(CollectionUtils.isNotEmpty(opinions) && opinions.size()>0){
+                    opinions.stream().forEach(on -> on.setNodeName(auditDetails.stream().filter(ad -> ad.getId().longValue() == on.getDetailId().longValue()).findFirst().get().getNodeName()));
+                }
             }
         }
         return opinions;
@@ -377,7 +379,12 @@ public class LawBaseUiController extends BaseController {
                 request.setAttribute("attachDelBtnVisible", "hidden");
             }
             LawFlowNode curNode = lawFlowNodes.stream().filter(node -> node.getNodeId().equals(currentNodeId)).findFirst().orElse(null);
-            request.setAttribute("curNodeName", curNode.getNodeName());
+            if(curNode.getNodeCode().equals("NODE001")){
+                // 当前节点为申请人节点时,显示"暂存"按钮
+                request.setAttribute("curNodeName", "");
+            }else{
+                request.setAttribute("curNodeName", curNode.getNodeName());
+            }
         }else{
             if(isHasNodeAuth(lawNodeAuths,"NODE001") && instId.longValue() == ShiroUtils.getInstId().longValue()){
                 // 判断当前用户是否有申请人角色，同时是否属于当前业务的创建机构

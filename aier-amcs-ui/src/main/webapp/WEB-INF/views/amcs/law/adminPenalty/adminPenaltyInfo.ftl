@@ -57,6 +57,7 @@
         <!-- 机构信息 -->
         <h2 class="h2-title-a">
             <span class="s-title">机构信息</span>
+            [#if curNodeName != ''] <span style="display: inline-block; color: red;">当前审批节点:${curNodeName!}</span> [/#if]
         </h2>
         <hr class="mar-l10 mar-r10 mar-t0 mar-b20" style="border-color:#b2def4">
         <div class="row">
