@@ -245,6 +245,26 @@ public class LawBaseUiController extends BaseController {
         }
     }
 
+    protected Institution getParentInst(){
+        Long curUserInstId = ShiroUtils.getInstId();
+        Institution institution = institutionService.getById(curUserInstId);
+        String treePath = institution.getTreepath();
+        if(Objects.nonNull(treePath) && treePath.length() > 0){
+            List<Long> result = Arrays.stream(treePath.split(","))  // 分割字符串
+                    .map(String::trim)                           // 去除前后空格
+                    .filter(s -> !s.isEmpty())                   // 过滤空字符串
+                    .map(Long::valueOf)                          // 转为 Long 类型
+                    .collect(Collectors.toList());
+            if(result.size() == 1){
+                return institutionService.getById(result.get(0));
+            }else{
+                return institutionService.getById(result.get(1));
+            }
+        }else{
+            return institutionService.getById(institution.getParentId());
+        }
+    }
+
     protected void saveHandler(Long bizId,String bizType,String bizCode,boolean saveAttachFlag,List<LawAttachment> attachments){
         if(saveAttachFlag){
             // 保存附件

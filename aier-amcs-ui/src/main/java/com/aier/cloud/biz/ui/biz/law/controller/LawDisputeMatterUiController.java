@@ -4,6 +4,7 @@ import com.aier.cloud.api.amcs.law.condition.LawDisputeMatterCondition;
 import com.aier.cloud.api.amcs.law.domain.LawDisputeMatter;
 import com.aier.cloud.api.amcs.law.domain.LawFlowInstance;
 import com.aier.cloud.api.amcs.law.domain.LawFlowNode;
+import com.aier.cloud.basic.api.response.domain.sys.Institution;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.ui.biz.law.feign.LawDisputeMatterFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
@@ -81,6 +82,10 @@ public class LawDisputeMatterUiController extends LawBaseUiController {
         boolean saveAttachFlag = false;
         if (Objects.isNull(lawDisputeMatter.getId())) {
             saveAttachFlag = true;
+            Institution parentInst = getParentInst();
+            lawDisputeMatter.setSuperInstId(parentInst.getId());
+            lawDisputeMatter.setSuperInstName(parentInst.getName());
+            lawDisputeMatter.setStatus(1);
         }
         Map<String, Object> result = lawDisputeMatterFeignService.save(lawDisputeMatter);
         Long disputeMatterId = MapUtils.getLong(result, "disputeMatterId");
@@ -98,6 +103,7 @@ public class LawDisputeMatterUiController extends LawBaseUiController {
     @ResponseBody
     public Object initCommit(@RequestBody LawDisputeMatter lawDisputeMatter) {
         // 1.保存业务信息
+        lawDisputeMatter.setStatus(2);
         Map<String, Object> result = (Map<String, Object>) this.save(lawDisputeMatter);
         // 2.判断选取流程信息表中哪个流程
         Long flowId = getFlowId();

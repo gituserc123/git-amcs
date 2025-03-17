@@ -28,6 +28,9 @@ public class LawCivilCase extends BaseEntity {
     /** 省区/上级机构名称 */
     private String superInstName;
 
+    /** 状态:1-创建,2-审批中,3-结束,4-OA流程中,5-归档 */
+    private Integer status;
+
     /** 案件类别，如民事/裁等 */
     private String caseCategory;
 

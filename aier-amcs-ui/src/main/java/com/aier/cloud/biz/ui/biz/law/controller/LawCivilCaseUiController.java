@@ -2,6 +2,7 @@ package com.aier.cloud.biz.ui.biz.law.controller;
 
 import com.aier.cloud.api.amcs.law.condition.LawCivilCaseCondition;
 import com.aier.cloud.api.amcs.law.domain.*;
+import com.aier.cloud.basic.api.response.domain.sys.Institution;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.ui.biz.law.feign.LawCivilCaseFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
@@ -80,6 +81,10 @@ public class LawCivilCaseUiController extends LawBaseUiController {
         boolean saveAttachFlag = false;
         if(Objects.isNull(lawCivilCase.getId())){
             saveAttachFlag = true;
+            Institution parentInst = getParentInst();
+            lawCivilCase.setSuperInstId(parentInst.getId());
+            lawCivilCase.setSuperInstName(parentInst.getName());
+            lawCivilCase.setStatus(1);
         }
         Map<String,Object> result = lawCivilCaseFeignService.save(lawCivilCase);
         Long civilCaseId = MapUtils.getLong(result,"civilCaseId");
@@ -96,6 +101,7 @@ public class LawCivilCaseUiController extends LawBaseUiController {
     @ResponseBody
     public Object initCommit(@RequestBody LawCivilCase lawCivilCase){
         // 1.保存业务信息
+        lawCivilCase.setStatus(2);
         Map<String,Object> result = (Map<String,Object>)this.save(lawCivilCase);
         // 2.判断选取流程信息表中哪个流程
         Long flowId = getFlowId();

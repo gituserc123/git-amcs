@@ -4,6 +4,7 @@ import com.aier.cloud.api.amcs.law.condition.LawAdminPenaltyCondition;
 import com.aier.cloud.api.amcs.law.domain.LawAdminPenalty;
 import com.aier.cloud.api.amcs.law.domain.LawFlowInstance;
 import com.aier.cloud.api.amcs.law.domain.LawFlowNode;
+import com.aier.cloud.basic.api.response.domain.sys.Institution;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.ui.biz.law.feign.LawAdminPenaltyFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
@@ -81,6 +82,10 @@ public class LawAdminPenaltyUiController extends LawBaseUiController {
         boolean saveAttachFlag = false;
         if (Objects.isNull(lawAdminPenalty.getId())) {
             saveAttachFlag = true;
+            Institution parentInst = getParentInst();
+            lawAdminPenalty.setSuperInstId(parentInst.getId());
+            lawAdminPenalty.setSuperInstName(parentInst.getName());
+            lawAdminPenalty.setStatus(1);
         }
         Map<String, Object> result = lawAdminPenaltyFeignService.save(lawAdminPenalty);
         Long adminPenaltyId = MapUtils.getLong(result, "adminPenaltyId");
@@ -98,6 +103,7 @@ public class LawAdminPenaltyUiController extends LawBaseUiController {
     @ResponseBody
     public Object initCommit(@RequestBody LawAdminPenalty lawAdminPenalty) {
         // 1.保存业务信息
+        lawAdminPenalty.setStatus(2);
         Map<String, Object> result = (Map<String, Object>) this.save(lawAdminPenalty);
         // 2.判断选取流程信息表中哪个流程
         Long flowId = getFlowId();
