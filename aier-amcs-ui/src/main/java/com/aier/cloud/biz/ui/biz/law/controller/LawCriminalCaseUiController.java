@@ -9,7 +9,9 @@ import com.aier.cloud.basic.api.response.domain.sys.Institution;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.ui.biz.law.feign.LawCriminalCaseFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
+import com.aier.cloud.biz.ui.biz.law.feign.LawDictTypeFeignService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class LawCriminalCaseUiController extends LawBaseUiController {
 
     @Autowired
     private LawCriminalCaseFeignService lawCriminalCaseFeignService;
+
+    @Autowired
+    private LawDictTypeFeignService lawDictTypeFeignService;
 
     private static final String CRIMINAL_CASE_INFO = "amcs/law/criminalCase/criminalCaseInfo";
     private static final String CRIMINAL_CASE_LIST = "amcs/law/criminalCase/criminalCaseList";
@@ -41,9 +46,30 @@ public class LawCriminalCaseUiController extends LawBaseUiController {
      */
     @RequestMapping(value = "/queryCriminalCaseList", method = RequestMethod.POST)
     @ResponseBody
-    public PageResponse<Map<String, Object>> queryCriminalCaseList(){
-        LawCriminalCaseCondition cond = new LawCriminalCaseCondition();
-        return lawCriminalCaseFeignService.findListByCond(cond);
+    public PageResponse<Map<String, Object>> queryCriminalCaseList(LawCriminalCaseCondition cond){
+        PageResponse<Map<String, Object>> resultPages = lawCriminalCaseFeignService.findListByCond(cond);
+        List<Map<String, Object>> result = resultPages.getRows();
+        if(CollectionUtils.isNotEmpty(result) && result.size() > 0){
+            List<Map> criminalCaseTypeDict = lawDictTypeFeignService.selectByTypeCode("criminal_case_type");
+            List<Map> litigationPhaseDict = lawDictTypeFeignService.selectByTypeCode("criminal_litigation_phase");
+            for(Map<String, Object> map : result){
+                if(Objects.nonNull(MapUtils.getString(map, "caseType"))){
+                    Map criminalCaseType = criminalCaseTypeDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "caseType"))).findFirst().get();
+                    map.put("caseTypeTxt", MapUtils.getString(criminalCaseType,"valueDesc"));
+                    if(Objects.nonNull(MapUtils.getString(map, "chargeName"))){
+                        List<Map<String, Object>> chargeNameDict = lawDictTypeFeignService.selectSubDicts(MapUtils.getString(criminalCaseType,"typeCode"), MapUtils.getString(criminalCaseType,"valueCode"));
+                        Map<String, Object> chargeName = chargeNameDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "chargeName"))).findFirst().get();
+                        map.put("chargeNameTxt", MapUtils.getString(chargeName,"valueDesc"));
+                    }
+                }
+                if(Objects.nonNull(MapUtils.getString(map, "litigationPhase"))){
+                    Map litigationPhase = litigationPhaseDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "litigationPhase"))).findFirst().get();
+                    map.put("litigationPhaseTxt", MapUtils.getString(litigationPhase,"valueDesc"));
+                }
+            }
+
+        }
+        return resultPages;
     }
 
     /**

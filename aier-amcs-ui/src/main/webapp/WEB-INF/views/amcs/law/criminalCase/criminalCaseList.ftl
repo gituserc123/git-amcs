@@ -31,7 +31,7 @@
             fitColumns: false,
             tools: [],
             columns: [[
-                {title: "操作", field: "op", width: 100, formatter: function(v, row, index) {
+                {title: "操作", field: "op", width: 50, formatter: function(v, row, index) {
                         let opStr = '';
                         opStr += '<span class="s-op s-op-review icon-eye" title="查看" rel="' + index + '"></span>';
                         return opStr;
@@ -47,9 +47,10 @@
                 {title: '案件主办公安机关', field: 'handlingPsb', width: 150},
                 {title: '案件主办检察院', field: 'prosecutorOffice', width: 150},
                 {title: '案件主审法院', field: 'courtName', width: 150},
-                {title: '案件类型', field: 'caseType', width: 100},
-                {title: '罪名', field: 'chargeName', width: 120},
-                {title: '罪名其他描述', field: 'chargeNameDesc', width: 150},
+                {title: '案件类型', field: 'caseType', width: 100, hidden: true},
+                {title: '案件类型', field: 'caseTypeTxt', width: 100},
+                {title: '罪名', field: 'chargeName', width: 120, hidden: true},
+                {title: '罪名', field: 'chargeNameTxt', width: 120},
                 {title: '案号', field: 'caseNo', width: 120},
                 {title: '案件描述', field: 'caseDesc', width: 200},
 
@@ -57,7 +58,8 @@
                 {title: '涉案金额', field: 'involvedAmount', width: 100, formatter: function(v) {
                         return v ? '￥' + v.toFixed(2) : '';
                     }},
-                {title: '诉讼阶段', field: 'litigationPhase', width: 120},
+                {title: '诉讼阶段', field: 'litigationPhase', width: 120, hidden: true},
+                {title: '诉讼阶段', field: 'litigationPhaseTxt', width: 120},
                 {title: '当前状态', field: 'currentStatus', width: 200},
 
                 // 备注

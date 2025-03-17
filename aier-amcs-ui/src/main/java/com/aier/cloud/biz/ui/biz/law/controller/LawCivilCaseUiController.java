@@ -6,7 +6,9 @@ import com.aier.cloud.basic.api.response.domain.sys.Institution;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.ui.biz.law.feign.LawCivilCaseFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
+import com.aier.cloud.biz.ui.biz.law.feign.LawDictTypeFeignService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class LawCivilCaseUiController extends LawBaseUiController {
     @Autowired
     private LawCivilCaseFeignService lawCivilCaseFeignService;
 
+    @Autowired
+    private LawDictTypeFeignService lawDictTypeFeignService;
+
     private static final String CIVIL_CASE_INFO = "amcs/law/civilCase/civilCaseInfo";
     private static final String CIVIL_CASE_LIST = "amcs/law/civilCase/civilCaseList";
 
@@ -34,9 +39,39 @@ public class LawCivilCaseUiController extends LawBaseUiController {
 
     @RequestMapping(value = "/queryCivilCaseList", method = { RequestMethod.POST })
     @ResponseBody
-    public PageResponse<Map<String, Object>> queryCivilCaseList(){
-        LawCivilCaseCondition cond = new LawCivilCaseCondition();
-        return lawCivilCaseFeignService.findListByCond(cond);
+    public PageResponse<Map<String, Object>> queryCivilCaseList(LawCivilCaseCondition cond){
+        PageResponse<Map<String, Object>> resultPages = lawCivilCaseFeignService.findListByCond(cond);
+        List<Map<String, Object>> result = resultPages.getRows();
+        if(CollectionUtils.isNotEmpty(result) && result.size() > 0){
+            List<Map> caseTypeOneDict = lawDictTypeFeignService.selectByTypeCode("case_type_one");
+            List<Map> litigationPhaseDict = lawDictTypeFeignService.selectByTypeCode("litigation_phase");
+            List<Map> caseCategoryDict = lawDictTypeFeignService.selectByTypeCode("case_category");
+            List<Map> arbitrationPhaseDict = lawDictTypeFeignService.selectByTypeCode("arbitration_phase");
+            for(Map<String, Object> map : result){
+                if(Objects.nonNull(MapUtils.getString(map, "caseCategory"))){
+                    Map caseCategory = caseCategoryDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "caseCategory"))).findFirst().get();
+                    map.put("caseCategoryTxt", MapUtils.getString(caseCategory,"valueDesc"));
+                }
+                if(Objects.nonNull(MapUtils.getString(map, "caseTypeOne"))){
+                    Map caseTypeOne = caseTypeOneDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "caseTypeOne"))).findFirst().get();
+                    map.put("caseTypeOneTxt", MapUtils.getString(caseTypeOne,"valueDesc"));
+                    if(Objects.nonNull(MapUtils.getString(map, "caseTypeTwo"))){
+                        List<Map<String, Object>> caseTypeTwoDict = lawDictTypeFeignService.selectSubDicts(MapUtils.getString(caseTypeOne,"typeCode"), MapUtils.getString(caseTypeOne,"valueCode"));
+                        Map<String, Object> caseTypeTwo = caseTypeTwoDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "caseTypeTwo"))).findFirst().get();
+                        map.put("caseTypeTwoTxt", MapUtils.getString(caseTypeTwo,"valueDesc"));
+                    }
+                }
+                if(Objects.nonNull(MapUtils.getString(map, "litigationPhase"))){
+                    Map litigationPhase = litigationPhaseDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "litigationPhase"))).findFirst().get();
+                    map.put("litigationPhaseTxt", MapUtils.getString(litigationPhase,"valueDesc"));
+                }
+                if(Objects.nonNull(MapUtils.getString(map, "arbitrationPhase"))){
+                    Map arbitrationPhase = arbitrationPhaseDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "arbitrationPhase"))).findFirst().get();
+                    map.put("arbitrationPhaseTxt", MapUtils.getString(arbitrationPhase,"valueDesc"));
+                }
+            }
+        }
+        return resultPages;
     }
 
     /**

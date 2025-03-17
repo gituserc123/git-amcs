@@ -32,7 +32,7 @@
             fitColumns: false,
             tools: [],
             columns: [[
-                {title: "操作", field: "op", width: 100, formatter: function(v, row, index) {
+                {title: "操作", field: "op", width: 50, formatter: function(v, row, index) {
                         let opStr = '';
                         opStr += '<span class="s-op s-op-review icon-eye" title="查看" rel="' + index + '"></span>';
                         return opStr;
@@ -44,12 +44,12 @@
                 {title: '省区/上级机构', field: 'superInstName', width: 120},
 
                 // 案件信息
-                {title: '案件类别', field: 'caseCategory', width: 100},
-                {title: '案件类型一级', field: 'caseTypeOne', width: 120},
-                {title: '案件类型二级', field: 'caseTypeTwo', width: 120},
-                {title: '案件类型说明', field: 'caseTypeTwoDesc', width: 150},
-                {title: '案由', field: 'caseCause', width: 120},
-                {title: '案由说明', field: 'caseCauseDesc', width: 150},
+                {title: '案件类别', field: 'caseCategory', width: 100, hidden: true},
+                {title: '案件类别', field: 'caseCategoryTxt', width: 100},
+                {title: '案件类型一级', field: 'caseTypeOne', width: 120, hidden: true},
+                {title: '案件类型二级', field: 'caseTypeTwo', width: 120, hidden: true},
+                {title: '案件类型', field: 'caseTypeOneTxt', width: 120},
+                {title: '案由', field: 'caseTypeTwoTxt', width: 120},
                 {title: '案号', field: 'caseNo', width: 120},
                 {title: '案情简介', field: 'caseDesc', width: 200},
 
@@ -57,11 +57,11 @@
                 {title: '涉案金额', field: 'involvedAmount', width: 100, formatter: function(v) {
                         return v ? '￥' + v.toFixed(2) : '';
                     }},
-                {title: '诉讼阶段', field: 'litigationPhase', width: 120},
-                {title: '诉讼阶段说明', field: 'litigationPhaseDesc', width: 150},
+                {title: '诉讼阶段', field: 'litigationPhase', width: 120, hidden: true},
+                {title: '诉讼阶段', field: 'litigationPhaseTxt', width: 120},
                 {title: '诉讼进展', field: 'litigationProgress', width: 120},
-                {title: '仲裁阶段', field: 'arbitrationPhase', width: 120},
-                {title: '仲裁阶段说明', field: 'arbitrationPhaseDesc', width: 150},
+                {title: '仲裁阶段', field: 'arbitrationPhase', width: 120, hidden: true},
+                {title: '仲裁阶段', field: 'arbitrationPhaseTxt', width: 150},
 
                 // 法院与承办人
                 {title: '收案法院', field: 'courtName', width: 150},
@@ -74,8 +74,6 @@
                 {title: '申报人电话', field: 'applicantPhone', width: 120},
                 // 时间信息
                 {title: '创建时间', field: 'createDate', width: 120, format: 'yyyy-MM-dd'},
-                {title: '开始时间', field: 'startDate', width: 120, format: 'yyyy-MM-dd'},
-                {title: '结束时间', field: 'endDate', width: 120, format: 'yyyy-MM-dd'},
                 // 其他信息
                 {title: '是否网络舆情', field: 'isPublicOpinion', width: 100, formatter: function(v) {
                         return v === 'Y' ? '是' : '否';

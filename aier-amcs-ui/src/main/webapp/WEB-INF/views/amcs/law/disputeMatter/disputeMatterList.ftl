@@ -31,7 +31,7 @@
             fitColumns: false,
             tools: [],
             columns: [[
-                {title: "操作", field: "op", width: 100, formatter: function(v, row, index) {
+                {title: "操作", field: "op", width: 50, formatter: function(v, row, index) {
                         let opStr = '';
                         opStr += '<span class="s-op s-op-review icon-eye" title="查看" rel="' + index + '"></span>';
                         return opStr;
