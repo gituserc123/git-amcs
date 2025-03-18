@@ -31,7 +31,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -725,14 +724,12 @@ public class LawBaseUiController extends BaseController {
                 // 集团登录
                 if (cond.getProvince() != null && cond.getProvince() > 0) {
                     if (cond.getInstId() != null && cond.getInstId() > 0) {
-                        Institution inst = institutionService.getById(cond.getInstId());
-                        cond.setInstId(Long.parseLong(inst.getAhisHosp().toString()));
                         cond.setInstList(null);
                     } else {
                         Object instList = hospHandleService.allHospFromParent(cond.getProvince());
                         if (instList != null) {
                             JSONArray ja = (JSONArray) instList;
-                            ArrayList<Long> hospList = org.assertj.core.util.Lists.newArrayList();
+                            ArrayList<Long> hospList = Lists.newArrayList();
                             ja.stream().forEach(j -> {
                                 JSONObject jo = (JSONObject) j;
                                 hospList.add(jo.getLong("ahisHosp"));
@@ -750,18 +747,15 @@ public class LawBaseUiController extends BaseController {
             } else {
                 // 省区登录
                 if (cond.getInstId() != null && cond.getInstId() > 0) {
-                    Institution inst = institutionService.getById(cond.getInstId());
-                    cond.setInstId(Long.parseLong(inst.getAhisHosp().toString()));
                     cond.setInstList(null);
                 } else {
                     Object instList = hospHandleService.allHospFromParent(shiroUser.getInstId());
-
                     if (instList != null) {
                         JSONArray ja = (JSONArray) instList;
-                        ArrayList<Long> hospList = org.assertj.core.util.Lists.newArrayList();
+                        ArrayList<Long> hospList = Lists.newArrayList();
                         ja.stream().forEach(j -> {
                             JSONObject jo = (JSONObject) j;
-                            hospList.add(jo.getLong("ahisHosp"));
+                            hospList.add(jo.getLong("id"));
                         });
                         cond.setInstId(null);
                         // 如果hospList为空，说明当前机构下没有医院，直接返回
