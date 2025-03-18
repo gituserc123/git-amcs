@@ -134,7 +134,7 @@ public class LawAdminPenaltyUiController extends LawBaseUiController {
         Long flowId = getFlowId();
         // 3.保存流程实例信息
         Long adminPenaltyId = MapUtils.getLong(result, "bizId");
-        LawFlowInstance lawFlowInstance = createFlowInstance(flowId, adminPenaltyId, lawAdminPenalty.getBizCode(), 1, "行政处罚事项");
+        LawFlowInstance lawFlowInstance = createFlowInstance(flowId, adminPenaltyId, lawAdminPenalty.getBizCode(), 3, "行政处罚事项");
         // 4.更新session中的流程实例信息
         ShiroUtils.removeSessionAttr("SessionLawFlowInstance_" + adminPenaltyId);
         // 5.保存流程明细表信息

@@ -1,14 +1,10 @@
 package com.aier.cloud.api.amcs.law.condition;
 
-import com.aier.cloud.api.amcs.law.domain.LawAttachment;
-import com.aier.cloud.basic.api.request.condition.base.PageCondition;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 民事诉讼仲裁案件查询条件
@@ -18,24 +14,10 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class LawAdminPenaltyCondition extends PageCondition implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class LawAdminPenaltyCondition extends LawBaseCondition {
 
     /** 主键 */
     private Long id;
-
-    /** 机构ID，关联医院或集团 */
-    private Long instId;
-
-    /** 机构名称，包含医院或集团名称 */
-    private String instName;
-
-    /** 省区/上级机构ID */
-    private Long superInstId;
-
-    /** 省区/上级机构名称 */
-    private String superInstName;
 
     /** 状态:1-创建,2-审批中,3-结束,4-OA流程中,5-归档 */
     private Integer status;

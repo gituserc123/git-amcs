@@ -40,6 +40,10 @@ public class LawCivilCaseUiController extends LawBaseUiController {
     @RequestMapping(value = "/queryCivilCaseList", method = { RequestMethod.POST })
     @ResponseBody
     public PageResponse<Map<String, Object>> queryCivilCaseList(LawCivilCaseCondition cond){
+        Boolean isRetNull = wrapperCond(cond);
+        if(isRetNull){
+            return new PageResponse<>();
+        }
         PageResponse<Map<String, Object>> resultPages = lawCivilCaseFeignService.findListByCond(cond);
         List<Map<String, Object>> result = resultPages.getRows();
         if(CollectionUtils.isNotEmpty(result) && result.size() > 0){

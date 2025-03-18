@@ -1,33 +1,18 @@
 package com.aier.cloud.api.amcs.law.condition;
 
-import com.aier.cloud.basic.api.request.condition.base.PageCondition;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
 @Setter
-public class LawCriminalCaseCondition  extends PageCondition implements Serializable {
+public class LawCriminalCaseCondition  extends LawBaseCondition {
 
-    private static final long serialVersionUID = 1L;
 
     /** 案件唯一标识，主键 */
     private Long id;
-
-    /** 机构ID，关联医院或集团 */
-    private Long instId;
-
-    /** 机构名称，包含医院或集团名称 */
-    private String instName;
-
-    /** 省区/上级机构ID */
-    private Long superInstId;
-
-    /** 省区/上级机构名称 */
-    private String superInstName;
 
     /** 状态:1-创建,2-审批中,3-结束,4-OA流程中,5-归档 */
     private Integer status;

@@ -43,6 +43,11 @@ public class LawCivilCase extends BaseEntity<LawCivilCase> {
     @TableField(value = "super_inst_name")
     private String superInstName;
 
+    /** 状态:1-创建,2-审批中,3-结束,4-OA流程中,5-归档 */
+    @Comment(value = "状态:1-创建,2-审批中,3-结束,4-OA流程中,5-归档")
+    @TableField(value = "status")
+    private Integer status;
+
     /** 案件类别，如民事/裁等 */
     @Comment(value = "案件类别，如民事/裁等")
     @TableField(value = "case_category")
@@ -184,4 +189,7 @@ public class LawCivilCase extends BaseEntity<LawCivilCase> {
     @TableField(value = "create_date", fill = FieldFill.INSERT)
     @NotBlank
     private Date createDate;
+
+    @TableField(exist = false)
+    private String currentNodeName; // 当前处理节点名称
 }

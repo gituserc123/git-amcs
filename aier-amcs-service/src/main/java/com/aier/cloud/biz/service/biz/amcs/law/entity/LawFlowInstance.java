@@ -48,10 +48,20 @@ public class LawFlowInstance extends BaseEntity<LawFlowInstance> {
     @TableField("prev_node")
     private String prevNode;
 
+    /** 上一处理节点名称 */
+    @Comment(value = "上一处理节点名称")
+    @TableField("prev_node_name")
+    private String prevNodeName;
+
     /** 当前处理节点 */
     @Comment(value = "当前处理节点")
     @TableField("current_node")
     private String currentNode;
+
+    /** 当前处理节点名称 */
+    @Comment(value = "当前处理节点名称")
+    @TableField("current_node_name")
+    private String currentNodeName;
 
     /** 创建者ID */
     @Comment(value = "创建者ID")

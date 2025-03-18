@@ -295,12 +295,12 @@
                 const sPreviews = $(this).find('.s-preview');
 
                 // 检查是否存在 s-previews
-                if (sPreviews.length === 0) {
+                /* if (sPreviews.length === 0) {
                     // 如果没有 s-preview，弹出提示
                     $pop.warning(relValue + '必须至少上传一个附件！');
                     attachFlag = false;
                     return false; // 跳过后续处理
-                }
+                } */
             });
 
             if (!attachFlag) {
@@ -381,7 +381,9 @@
         // 选择提交节点框显示的情况下，提交要检验必选
         if ($('.clsRejectForm').form('validate')) {
             let bizFormData = $('.commonDataForm').sovals();
+            let commitNodeName = $('#commitNode').combobox('getText');
             data.bizForm = bizFormData;
+            data.commitNodeName = commitNodeName;
             $ajax.post('${base}/ui/amcs/law/baseui/flowReject', data, {
                 jsonData: true,
                 tip: '确认退回？',

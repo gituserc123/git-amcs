@@ -109,7 +109,7 @@ public class LawDisputeMatterUiController extends LawBaseUiController {
         Long flowId = getFlowId();
         // 3.保存流程实例信息
         Long disputeMatterId = MapUtils.getLong(result, "bizId");
-        LawFlowInstance lawFlowInstance = createFlowInstance(flowId, disputeMatterId, lawDisputeMatter.getBizCode(), 1, "纠纷事项");
+        LawFlowInstance lawFlowInstance = createFlowInstance(flowId, disputeMatterId, lawDisputeMatter.getBizCode(), 4, "纠纷事项");
         // 4.更新session中的流程实例信息
         ShiroUtils.removeSessionAttr("SessionLawFlowInstance_" + disputeMatterId);
         // 5.保存流程明细表信息

@@ -194,4 +194,7 @@ public class LawAdminPenalty extends BaseEntity<LawAdminPenalty> {
     @TableField(value = "create_date", fill = FieldFill.INSERT)
     @NotBlank
     private Date createDate;
+
+    @TableField(exist = false)
+    private String currentNodeName; // 当前处理节点名称
 }

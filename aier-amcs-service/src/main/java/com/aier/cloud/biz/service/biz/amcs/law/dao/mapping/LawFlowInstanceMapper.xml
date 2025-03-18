@@ -11,7 +11,9 @@
         <result column="BIZ_TYPE" property="bizType" />
         <result column="BIZ_NAME" property="bizName" />
         <result column="PREV_NODE" property="prevNode" />
+        <result column="PREV_NODE_NAME" property="prevNodeName" />
         <result column="CURRENT_NODE" property="currentNode" />
+        <result column="CURRENT_NODE_NAME" property="currentNodeName" />
         <result column="CREATOR" property="creator" />
         <result column="CREATE_DATE" property="createDate" />
         <result column="MODIFER" property="modifier" />
@@ -20,6 +22,6 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        ID, FLOW_ID, BIZ_ID, BIZ_CODE, BIZ_TYPE, BIZ_NAME, PREV_NODE, CURRENT_NODE, CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
+        ID, FLOW_ID, BIZ_ID, BIZ_CODE, BIZ_TYPE, BIZ_NAME, PREV_NODE,PREV_NODE_NAME, CURRENT_NODE, CURRENT_NODE_NAME, CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
     </sql>
 </mapper>

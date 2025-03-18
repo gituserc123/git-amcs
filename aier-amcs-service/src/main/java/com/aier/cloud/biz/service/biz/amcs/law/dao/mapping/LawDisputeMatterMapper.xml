@@ -36,30 +36,31 @@
     </sql>
 
     <!-- 通用查询条件 -->
-    <sql id="BaseWhereClause">
-        <where>
-            <if test="cond.startDate != null">
-                AND tldm.CREATE_DATE >= #{cond.startDate}
+    <sql id="sql_where">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            1=1
+            <if test="cond.id != null and cond.id > 0">
+                and t.id = #{cond.id}
             </if>
-            <if test="cond.endDate != null">
-                AND tldm.CREATE_DATE &lt;= #{cond.endDate}
+            <if test="cond.instId != null and cond.instId > 0">
+                and t.inst_id = #{cond.instId}
             </if>
-            <if test="cond.status != null">
-                AND tldm.STATUS = #{cond.status}
+            <if test="cond.instList != null and cond.instList.size() > 0">
+                and t.inst_id in
+                <foreach collection="cond.instList" index="index" item="item"
+                         separator="," open="(" close=")">
+                    #{item}
+                </foreach>
             </if>
-            <if test="cond.instId != null">
-                AND tldm.INST_ID = #{cond.instId}
-            </if>
-        </where>
+        </trim>
     </sql>
 
     <!-- 分页查询 -->
-    <select id="getAll" resultMap="BaseResultMap">
+    <select id="getAll" resultType="com.aier.cloud.biz.service.biz.amcs.law.entity.LawDisputeMatter">
         SELECT
-        <include refid="BaseColumnList"/>
-        FROM T_LAW_DISPUTE_MATTER tldm
-        <include refid="BaseWhereClause"/>
-        ORDER BY tldm.CREATE_DATE DESC
+        t.*,tlf.current_node_name
+        FROM T_LAW_DISPUTE_MATTER t left join T_LAW_FLOW_INSTANCE tlf on t.id = tlf.biz_id
+        <include refid="sql_where"/>
     </select>
 
     <!-- 机构维度查询 -->

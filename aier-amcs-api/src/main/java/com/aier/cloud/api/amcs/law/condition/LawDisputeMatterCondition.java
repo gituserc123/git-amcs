@@ -1,12 +1,8 @@
 package com.aier.cloud.api.amcs.law.condition;
 
-import com.aier.cloud.api.amcs.law.domain.LawAttachment;
-import com.aier.cloud.basic.api.request.condition.base.PageCondition;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * T_LAW_DICT_TYPE
@@ -14,25 +10,10 @@ import java.util.List;
  * @since 2023-10-18
  */
 @Data
-public class LawDisputeMatterCondition extends PageCondition implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class LawDisputeMatterCondition extends LawBaseCondition {
 
     /** 案件唯一标识，主键 */
     private Long id;
-
-    /** 机构ID，关联医院或集团 */
-    private Long instId;
-
-    /** 机构名称，包含医院或集团名称 */
-    private String instName;
-
-    /** 省区/上级机构ID */
-    private Long superInstId;
-
-    /** 省区/上级机构名称 */
-    private String superInstName;
 
     /** 状态:1-创建,2-审批中,3-结束,4-OA流程中,5-归档 */
     private Integer status;

@@ -16,4 +16,6 @@ public class LawFlowInstance extends BaseEntity {
     private String currentNode; // 当前处理节点
     private Long creator; // 创建者ID
     private Date createDate; // 创建时间
+    private String prevNodeName; // 上一处理节点名称
+    private String currentNodeName; // 当前处理节点名称
 }

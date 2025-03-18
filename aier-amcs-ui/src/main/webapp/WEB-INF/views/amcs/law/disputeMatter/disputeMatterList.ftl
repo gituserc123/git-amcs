@@ -41,6 +41,7 @@
                 {title: '机构名称', field: 'instName', width: 120},
                 {title: '省区/上级机构ID', field: 'superInstId', width: 100, hidden: true},
                 {title: '省区/上级机构', field: 'superInstName', width: 120},
+                {title: '流程节点', field: 'currentNodeName', width: 120},
 
                 // 纠纷事项信息
                 {title: '对方全称', field: 'opponentFullName', width: 150},

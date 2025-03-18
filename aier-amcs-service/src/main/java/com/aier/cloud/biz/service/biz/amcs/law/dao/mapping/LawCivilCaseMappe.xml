@@ -12,6 +12,7 @@
 		<result column="INST_NAME" jdbcType="VARCHAR" property="instName" />
 		<result column="SUPER_INST_ID" jdbcType="DECIMAL" property="superInstId" />
 		<result column="SUPER_INST_NAME" jdbcType="VARCHAR" property="superInstName" />
+		<result column="STATUS" jdbcType="DECIMAL" property="status"/>
 		<result column="CASE_CATEGORY" jdbcType="VARCHAR" property="caseCategory" />
 		<result column="CASE_TYPE_ONE" jdbcType="VARCHAR" property="caseTypeOne" />
 		<result column="CASE_TYPE_TWO" jdbcType="VARCHAR" property="caseTypeTwo" />
@@ -46,7 +47,7 @@
 
 	<!-- 基础字段列表 -->
 	<sql id="BaseColumnList">
-		ID, INST_ID, INST_NAME, SUPER_INST_ID, SUPER_INST_NAME, CASE_CATEGORY, CASE_TYPE_ONE, CASE_TYPE_TWO,
+		ID, INST_ID, INST_NAME, SUPER_INST_ID, SUPER_INST_NAME, STATUS, CASE_CATEGORY, CASE_TYPE_ONE, CASE_TYPE_TWO,
 		CASE_TYPE_TWO_DESC, OUR_LITIGATION_SUBJECT, PLAINTIFF_NAME, DEFENDANT_NAME, CASE_CAUSE, CASE_CAUSE_DESC,
 		CASE_NO, CASE_DESC, INVOLVED_AMOUNT, LITIGATION_PHASE, LITIGATION_PHASE_DESC, LITIGATION_PROGRESS,
 		ARBITRATION_PHASE, ARBITRATION_PHASE_DESC, COURT_NAME, HANDLER_NAME, HANDLER_PHONE, APPLY_UNIT,
@@ -54,10 +55,29 @@
 		CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
 	</sql>
 
+	<sql id="sql_where">
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			1=1
+			<if test="cond.id != null and cond.id > 0">
+				and t.id = #{cond.id}
+			</if>
+			<if test="cond.instId != null and cond.instId > 0">
+				and t.inst_id = #{cond.instId}
+			</if>
+			<if test="cond.instList != null and cond.instList.size() > 0">
+				and t.inst_id in
+				<foreach collection="cond.instList" index="index" item="item"
+						 separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+		</trim>
+	</sql>
+
 	<select id="getAll" resultType="com.aier.cloud.biz.service.biz.amcs.law.entity.LawCivilCase">
 		SELECT
-		tlcc.*
-		FROM T_LAW_CIVIL_CASE tlcc left join T_LAW_FLOW_INSTANCE tlf on tlcc.id = tlf.biz_id
-		where 1=1
+		t.*,tlf.current_node_name
+		FROM T_LAW_CIVIL_CASE t left join T_LAW_FLOW_INSTANCE tlf on t.id = tlf.biz_id
+		<include refid="sql_where"/>
 	</select>
 </mapper>

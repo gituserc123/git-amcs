@@ -118,4 +118,7 @@ public class LawCriminalCase extends BaseEntity<LawCriminalCase> {
     @TableField("CREATE_DATE")
     @Comment(value = "创建时间")
     private Date createDate;
+
+    @TableField(exist = false)
+    private String currentNodeName; // 当前处理节点名称
 }

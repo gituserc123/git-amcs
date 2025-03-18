@@ -79,4 +79,6 @@ public class LawCriminalCase extends BaseEntity {
     private String bizCode;
 
     private String bizType;
+
+    private String currentNodeName; // 当前处理节点名称
 }

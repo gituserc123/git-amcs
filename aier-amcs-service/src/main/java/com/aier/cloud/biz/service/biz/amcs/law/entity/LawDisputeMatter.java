@@ -138,4 +138,7 @@ public class LawDisputeMatter extends BaseEntity<LawDisputeMatter> {
     /** 业务编码 */
     @TableField(exist = false)
     private String bizCode;
+
+    @TableField(exist = false)
+    private String currentNodeName; // 当前处理节点名称
 }

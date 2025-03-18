@@ -1,6 +1,9 @@
 package com.aier.cloud.biz.ui.biz.law.controller;
 
+import com.aier.cloud.api.amcs.condition.ProvinceRoleCondition;
+import com.aier.cloud.api.amcs.constant.Constants;
 import com.aier.cloud.api.amcs.law.condition.LawAuditOpinionCondition;
+import com.aier.cloud.api.amcs.law.condition.LawBaseCondition;
 import com.aier.cloud.basic.api.domain.base.BaseEntity;
 import com.aier.cloud.api.amcs.law.condition.LawNodeAuthCondition;
 import com.aier.cloud.api.amcs.law.constant.LawConstants;
@@ -10,19 +13,25 @@ import com.aier.cloud.basic.api.response.domain.base.PageResponse;
 import com.aier.cloud.basic.api.response.domain.file.FileInfo;
 import com.aier.cloud.basic.api.response.domain.sys.Institution;
 import com.aier.cloud.basic.web.controller.BaseController;
+import com.aier.cloud.basic.web.shiro.ShiroUser;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.ui.biz.adverse.feign.FileService;
+import com.aier.cloud.biz.ui.biz.adverse.service.HospHandleService;
 import com.aier.cloud.biz.ui.biz.adverse.utils.FileValidator;
 import com.aier.cloud.biz.ui.biz.law.feign.*;
 import com.aier.cloud.biz.ui.biz.sys.feign.InstitutionService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,6 +68,9 @@ public class LawBaseUiController extends BaseController {
 
     @Autowired
     private LawAttachmentFeignService lawAttachmentFeignService;
+
+    @Autowired
+    private HospHandleService hospHandleService;
 
     @Autowired
     private FileService fs;
@@ -194,7 +206,8 @@ public class LawBaseUiController extends BaseController {
         Long bizId = data.getLong("id");
         String opinion = MapUtils.getString(dataMaps,"opinion");
         Long currentNodeId = MapUtils.getLong(dataMaps,"commitNode");
-        rejectHandler(bizId,opinion,currentNodeId);
+        String commiteNodeName = MapUtils.getString(dataMaps,"commitNodeName");
+        rejectHandler(bizId,opinion,currentNodeId,commiteNodeName);
         return success();
     }
 
@@ -477,7 +490,9 @@ public class LawBaseUiController extends BaseController {
         lawFlowInstance.setBizType(bizType);
         lawFlowInstance.setBizName(bizName);
         lawFlowInstance.setPrevNode(lawFlowNodes.get(0).getNodeId().toString());
+        lawFlowInstance.setPrevNodeName(lawFlowNodes.get(0).getNodeName());
         lawFlowInstance.setCurrentNode(lawFlowNodes.get(1).getNodeId().toString());
+        lawFlowInstance.setCurrentNodeName(lawFlowNodes.get(1).getNodeName());
         lawFlowInstance.setCreator(ShiroUtils.getId());
         lawFlowInstance.setModifer(ShiroUtils.getId());
         lawFlowInstance.setCreateDate(new Date());
@@ -604,7 +619,9 @@ public class LawBaseUiController extends BaseController {
         retMaps.put("saveFlag", Boolean.FALSE);
         LawFlowInstance lawFlowInstance = getFlowInstanceByBizId(bizId);
         String preNode = lawFlowInstance.getPrevNode();
+        String preNodeName = lawFlowInstance.getPrevNodeName();
         String curNode = lawFlowInstance.getCurrentNode();
+        String curNodeName = lawFlowInstance.getCurrentNodeName();
         // 1.判断最后一条审核记录是"SUBMIT"，还是"REJECT";
         List<LawAuditDetail> lawAuditDetails = getAuditDetailByInstanceId(lawFlowInstance.getId());
         if(CollectionUtils.isNotEmpty(lawAuditDetails) && lawAuditDetails.size()>0){
@@ -612,21 +629,25 @@ public class LawBaseUiController extends BaseController {
             if("REJECT".equals(lawAuditDetails.get(0).getAction())){
                 // 默认提交到退回的发起节点
                 lawFlowInstance.setCurrentNode(preNode);
+                lawFlowInstance.setCurrentNodeName(preNodeName);
                 retMaps.put("saveFlag", Boolean.TRUE);
             }else{
                 // 获取流程当前节点的下一个节点
                 List<LawFlowNode> lawFlowNodes = getFlowNodeByFlowId(lawFlowInstance.getFlowId());
                 LawFlowNode lawFlowNode = getNextNodeAfterCurrent(lawFlowNodes,Long.parseLong(curNode));
                 lawFlowInstance.setCurrentNode(String.valueOf(lawFlowNode.getNodeId()));
+                lawFlowInstance.setCurrentNodeName(lawFlowNode.getNodeName());
             }
         }else{
             // 获取流程当前节点的下一个节点
             List<LawFlowNode> lawFlowNodes = getFlowNodeByFlowId(lawFlowInstance.getFlowId());
             LawFlowNode lawFlowNode = getNextNodeAfterCurrent(lawFlowNodes,Long.parseLong(curNode));
             lawFlowInstance.setCurrentNode(String.valueOf(lawFlowNode.getNodeId()));
+            lawFlowInstance.setCurrentNodeName(lawFlowNode.getNodeName());
         }
         // 2.修改流程实例表信息
         lawFlowInstance.setPrevNode(curNode);
+        lawFlowInstance.setPrevNodeName(curNodeName);
         lawFlowInstance.setModifer(ShiroUtils.getId());
         lawFlowInstance.setModifyDate(new Date());
         lawFlowInstance = insertOrUpdateFlowInstance(lawFlowInstance);
@@ -647,12 +668,15 @@ public class LawBaseUiController extends BaseController {
         return retMaps;
     }
 
-    protected void rejectHandler(Long bizId,String opinion,Long currentNodeId){
+    protected void rejectHandler(Long bizId,String opinion,Long currentNodeId,String commiteNodeName){
         LawFlowInstance lawFlowInstance = getFlowInstanceByBizId(bizId);
         String curNode = lawFlowInstance.getCurrentNode();
+        String curNodeName = lawFlowInstance.getCurrentNodeName();
         // 2.修改流程实例表信息
         lawFlowInstance.setCurrentNode(String.valueOf(currentNodeId));
+        lawFlowInstance.setCurrentNodeName(commiteNodeName);
         lawFlowInstance.setPrevNode(curNode);
+        lawFlowInstance.setPrevNodeName(curNodeName);
         lawFlowInstance.setModifer(ShiroUtils.getId());
         lawFlowInstance.setModifyDate(new Date());
         lawFlowInstance = insertOrUpdateFlowInstance(lawFlowInstance);
@@ -685,4 +709,80 @@ public class LawBaseUiController extends BaseController {
     protected PageResponse<Map<String, Object>> getNodeAuthPage(LawNodeAuthCondition cond){
         return lawNodeAuthFeignService.getAll(cond);
     }
+
+
+    protected <T extends LawBaseCondition> Boolean wrapperCond(T cond){
+        boolean isRetNull = false;
+        Subject subject = SecurityUtils.getSubject();
+        ShiroUser shiroUser = (ShiroUser) subject.getPrincipal();
+        ProvinceRoleCondition provinceRoleCondition = new ProvinceRoleCondition();
+        provinceRoleCondition.setStaffCode(shiroUser.getLoginCode());
+        if (shiroUser.getIsHosp()) {
+            // 医院登录
+            cond.setInstId(shiroUser.getInstId());
+        } else {
+            if (Constants.GroupInstId.equals(ShiroUtils.getInstId())) {
+                // 集团登录
+                if (cond.getProvince() != null && cond.getProvince() > 0) {
+                    if (cond.getInstId() != null && cond.getInstId() > 0) {
+                        Institution inst = institutionService.getById(cond.getInstId());
+                        cond.setInstId(Long.parseLong(inst.getAhisHosp().toString()));
+                        cond.setInstList(null);
+                    } else {
+                        Object instList = hospHandleService.allHospFromParent(cond.getProvince());
+                        if (instList != null) {
+                            JSONArray ja = (JSONArray) instList;
+                            ArrayList<Long> hospList = org.assertj.core.util.Lists.newArrayList();
+                            ja.stream().forEach(j -> {
+                                JSONObject jo = (JSONObject) j;
+                                hospList.add(jo.getLong("ahisHosp"));
+                            });
+                            cond.setInstId(null);
+                            // 如果hospList为空，说明当前机构下没有医院，直接返回
+                            if (hospList.size() > 0) {
+                                cond.setInstList(hospList);
+                            } else {
+                                isRetNull=true;
+                            }
+                        }
+                    }
+                }
+            } else {
+                // 省区登录
+                if (cond.getInstId() != null && cond.getInstId() > 0) {
+                    Institution inst = institutionService.getById(cond.getInstId());
+                    cond.setInstId(Long.parseLong(inst.getAhisHosp().toString()));
+                    cond.setInstList(null);
+                } else {
+                    Object instList = hospHandleService.allHospFromParent(shiroUser.getInstId());
+
+                    if (instList != null) {
+                        JSONArray ja = (JSONArray) instList;
+                        ArrayList<Long> hospList = org.assertj.core.util.Lists.newArrayList();
+                        ja.stream().forEach(j -> {
+                            JSONObject jo = (JSONObject) j;
+                            hospList.add(jo.getLong("ahisHosp"));
+                        });
+                        cond.setInstId(null);
+                        // 如果hospList为空，说明当前机构下没有医院，直接返回
+                        if (hospList.size() > 0) {
+                            cond.setInstList(hospList);
+                        } else {
+                            isRetNull=true;
+                        }
+                    }
+                }
+            }
+        }
+        /** inst_id=>hosp_id */
+        /*if (Objects.nonNull(cond.getInstId()) && cond.getInstId() > 9999) {
+            Institution inst = institutionService.getById(cond.getInstId());
+            if (!ObjectUtils.isEmpty(inst)) {
+                cond.setInstId(Long.parseLong(inst.getAhisHosp().toString()));
+            }
+        }*/
+
+        return isRetNull;
+    }
+
 }

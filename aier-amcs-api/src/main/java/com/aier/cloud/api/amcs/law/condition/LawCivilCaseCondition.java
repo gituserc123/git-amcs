@@ -16,24 +16,11 @@ import java.util.Date;
  */
 @Getter
 @Setter
-public class LawCivilCaseCondition extends PageCondition implements Serializable {
+public class LawCivilCaseCondition extends LawBaseCondition {
 
-    private static final long serialVersionUID = 1L;
 
     /** 案件唯一标识，主键 */
     private Long id;
-
-    /** 机构ID，关联医院或集团 */
-    private Long instId;
-
-    /** 机构名称，包含医院或集团名称 */
-    private String instName;
-
-    /** 省区/上级机构ID */
-    private Long superInstId;
-
-    /** 省区/上级机构名称 */
-    private String superInstName;
 
     /** 案件类别，如民事/裁等 */
     private String caseCategory;

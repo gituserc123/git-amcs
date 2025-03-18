@@ -127,5 +127,7 @@ public class LawCivilCase extends BaseEntity {
 
     private String bizType;
 
+    private String currentNodeName; // 当前处理节点名称
+
 
 }
