@@ -45,20 +45,18 @@
                 // 行政处罚信息
                 {title: '受处罚单位/个人', field: 'partyName', width: 150},
                 {title: '行政机关全称', field: 'authorityName', width: 150},
-                {title: '处罚告知单位', field: 'penalizedUnit', width: 150},
-                {title: '文书类型', field: 'documentType', width: 100},
-                {title: '文书类型其他', field: 'documentTypeOther', width: 120},
+                {title: '文书类型', field: 'documentType', width: 100, hidden: true},
+                {title: '文书类型', field: 'documentTypeTxt', width: 100},
                 {title: '文书编号', field: 'documentNo', width: 120},
                 {title: '受案日期', field: 'filingDate', width: 100, format: 'yyyy-MM-dd'},
                 {title: '处罚日期', field: 'penaltyDate', width: 100, format: 'yyyy-MM-dd'},
                 {title: '收文日期', field: 'receiveDate', width: 100, format: 'yyyy-MM-dd'},
 
                 // 案件信息
-                {title: '案件名称', field: 'caseName', width: 150},
-                {title: '处罚事由', field: 'penaltyReason', width: 100},
-                {title: '处罚事由其他', field: 'penaltyReasonOther', width: 120},
-                {title: '处罚类别', field: 'penaltyCategory', width: 100},
-                {title: '处罚类别其他', field: 'penaltyCategoryOther', width: 120},
+                {title: '处罚事由', field: 'penaltyReason', width: 100, hidden: true},
+                {title: '处罚事由', field: 'penaltyReasonTxt', width: 100},
+                {title: '处罚类别', field: 'penaltyCategory', width: 100, hidden: true},
+                {title: '处罚类别', field: 'penaltyCategoryTxt', width: 100},
                 {title: '处罚依据', field: 'penaltyBasis', width: 200},
                 {title: '处罚措施', field: 'penaltyMeasures', width: 200},
 

@@ -8,7 +8,9 @@ import com.aier.cloud.basic.api.response.domain.sys.Institution;
 import com.aier.cloud.basic.web.shiro.ShiroUtils;
 import com.aier.cloud.biz.ui.biz.law.feign.LawAdminPenaltyFeignService;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
+import com.aier.cloud.biz.ui.biz.law.feign.LawDictTypeFeignService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class LawAdminPenaltyUiController extends LawBaseUiController {
     @Autowired
     private LawAdminPenaltyFeignService lawAdminPenaltyFeignService;
 
+    @Autowired
+    private LawDictTypeFeignService lawDictTypeFeignService;
+
     private static final String ADMIN_PENALTY_INFO = "amcs/law/adminPenalty/adminPenaltyInfo";
     private static final String ADMIN_PENALTY_LIST = "amcs/law/adminPenalty/adminPenaltyList";
 
@@ -35,9 +40,29 @@ public class LawAdminPenaltyUiController extends LawBaseUiController {
 
     @RequestMapping(value = "/queryAdminPenaltyList", method = { RequestMethod.POST })
     @ResponseBody
-    public PageResponse<Map<String, Object>> queryAdminPenaltyList() {
-        LawAdminPenaltyCondition cond = new LawAdminPenaltyCondition();
-        return lawAdminPenaltyFeignService.findListByCond(cond);
+    public PageResponse<Map<String, Object>> queryAdminPenaltyList(LawAdminPenaltyCondition cond) {
+        PageResponse<Map<String, Object>> resultPages = lawAdminPenaltyFeignService.findListByCond(cond);
+        List<Map<String, Object>> result = resultPages.getRows();
+        if(CollectionUtils.isNotEmpty(result) && result.size() > 0){
+            List<Map> documentTypeDict = lawDictTypeFeignService.selectByTypeCode("document_type");
+            List<Map> penaltyReasonDict = lawDictTypeFeignService.selectByTypeCode("penalty_reason");
+            List<Map> penaltyCategoryDict = lawDictTypeFeignService.selectByTypeCode("penalty_category");
+            for(Map<String, Object> map : result){
+                if(Objects.nonNull(MapUtils.getString(map, "documentType"))){
+                    Map documentType = documentTypeDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "documentType"))).findFirst().get();
+                    map.put("documentTypeTxt", MapUtils.getString(documentType,"valueDesc"));
+                }
+                if(Objects.nonNull(MapUtils.getString(map, "penaltyReason"))){
+                    Map penaltyReasonType = penaltyReasonDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "penaltyReason"))).findFirst().get();
+                    map.put("penaltyReasonTxt", MapUtils.getString(penaltyReasonType,"valueDesc"));
+                }
+                if(Objects.nonNull(MapUtils.getString(map, "penaltyCategory"))){
+                    Map penaltyCategory = penaltyCategoryDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "penaltyCategory"))).findFirst().get();
+                    map.put("penaltyCategoryTxt", MapUtils.getString(penaltyCategory,"valueDesc"));
+                }
+            }
+        }
+        return resultPages;
     }
 
     /**
