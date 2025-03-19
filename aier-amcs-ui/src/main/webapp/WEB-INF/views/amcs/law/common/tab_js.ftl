@@ -143,7 +143,7 @@
                 $('#op-div').css('visibility', 'hidden');
                 [#if bizId != null && bizId != '']
                 let objParams = {'bizId': '${bizId!}'};
-                lawOpinionList.init(objParams);
+                lawOpinionList.init(objParams,`${base}/ui/amcs/law/baseui/getLawOpinionList`);
                 [/#if]
             } else {
                 var valDisplay = $('#op-div').attr('display');

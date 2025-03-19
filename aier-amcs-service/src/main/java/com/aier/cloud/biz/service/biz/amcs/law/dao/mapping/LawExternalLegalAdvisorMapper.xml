@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawExternalLegalAdvisorMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawExternalLegalAdvisor">
+        <!-- 主键 -->
+        <id column="ID" jdbcType="DECIMAL" property="id" />
+
+        <!-- 其他字段 -->
+        <result column="INST_ID" jdbcType="DECIMAL" property="instId" />
+        <result column="INST_NAME" jdbcType="VARCHAR" property="instName" />
+        <result column="SUPER_INST_ID" jdbcType="DECIMAL" property="superInstId" />
+        <result column="SUPER_INST_NAME" jdbcType="VARCHAR" property="superInstName" />
+        <result column="APPLY_UNIT" jdbcType="VARCHAR" property="applyUnit" />
+        <result column="APPLICANT_NAME" jdbcType="VARCHAR" property="applicantName" />
+        <result column="LAW_FIRM_NAME" jdbcType="VARCHAR" property="lawFirmName" />
+        <result column="UNIFIED_CREDIT_CODE" jdbcType="VARCHAR" property="unifiedCreditCode" />
+        <result column="REGISTERED_ADDRESS" jdbcType="VARCHAR" property="registeredAddress" />
+        <result column="HOST_LAWYER_NAME" jdbcType="VARCHAR" property="hostLawyerName" />
+        <result column="HOST_LAWYER_CONTACT" jdbcType="VARCHAR" property="hostLawyerContact" />
+        <result column="EXPERTISE_FIELD" jdbcType="DECIMAL" property="expertiseField" />
+        <result column="EXPERTISE_OTHER" jdbcType="VARCHAR" property="expertiseOther" />
+        <result column="QUALIFICATION_PROOF" jdbcType="VARCHAR" property="qualificationProof" />
+        <result column="SERVICE_TYPE" jdbcType="DECIMAL" property="serviceType" />
+        <result column="SERVICE_TYPE_OTHER" jdbcType="VARCHAR" property="serviceTypeOther" />
+        <result column="SERVICE_SCOPE" jdbcType="VARCHAR" property="serviceScope" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="CREATOR" jdbcType="DECIMAL" property="creator" />
+        <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
+        <result column="MODIFER" jdbcType="DECIMAL" property="modifer" />
+        <result column="MODIFY_DATE" jdbcType="TIMESTAMP" property="modifyDate" />
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="BaseColumnList">
+        ID, INST_ID, INST_NAME, SUPER_INST_ID, SUPER_INST_NAME, APPLY_UNIT, APPLICANT_NAME, LAW_FIRM_NAME,
+        UNIFIED_CREDIT_CODE, REGISTERED_ADDRESS, HOST_LAWYER_NAME, HOST_LAWYER_CONTACT, EXPERTISE_FIELD,
+        EXPERTISE_OTHER, QUALIFICATION_PROOF, SERVICE_TYPE, SERVICE_TYPE_OTHER, SERVICE_SCOPE, REMARK,
+        CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
+    </sql>
+
+    <!-- 动态查询条件 -->
+    <sql id="sql_where">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            1=1
+            <if test="cond.id != null and cond.id > 0">
+                AND t.ID = #{cond.id}
+            </if>
+            <if test="cond.instId != null and cond.instId > 0">
+                AND t.INST_ID = #{cond.instId}
+            </if>
+            <if test="cond.instName != null and cond.instName != ''">
+                AND t.INST_NAME LIKE CONCAT('%', #{cond.instName}, '%')
+            </if>
+            <if test="cond.lawFirmName != null and cond.lawFirmName != ''">
+                AND t.LAW_FIRM_NAME LIKE CONCAT('%', #{cond.lawFirmName}, '%')
+            </if>
+            <if test="cond.hostLawyerName != null and cond.hostLawyerName != ''">
+                AND t.HOST_LAWYER_NAME LIKE CONCAT('%', #{cond.hostLawyerName}, '%')
+            </if>
+            <if test="cond.serviceType != null">
+                AND t.SERVICE_TYPE = #{cond.serviceType}
+            </if>
+            <if test="cond.startDate != null">
+                AND t.CREATE_DATE >= #{cond.startDate}
+            </if>
+            <if test="cond.endDate != null">
+                AND t.CREATE_DATE &lt;= #{cond.endDate}
+            </if>
+        </trim>
+    </sql>
+
+    <!-- 分页查询外聘法律顾问信息 -->
+    <select id="getAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="BaseColumnList" />
+        FROM T_LAW_EXTERNAL_LEGAL_ADVISOR t
+        <include refid="sql_where" />
+        ORDER BY t.CREATE_DATE DESC
+    </select>
+
+</mapper>

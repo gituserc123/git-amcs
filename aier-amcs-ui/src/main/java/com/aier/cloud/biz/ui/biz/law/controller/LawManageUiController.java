@@ -52,10 +52,15 @@ public class LawManageUiController extends LawBaseUiController {
         disputeMatter.put("lawTitle", "法务填报");
         disputeMatter.put("lawUrl", "ui/amcs/law/disputeMatter/info");
         disputeMatter.put("lawName", "纠纷事项");
+        Map<String, Object> externalLegalAdvisor = Maps.newHashMap();
+        externalLegalAdvisor.put("lawTitle", "法务填报");
+        externalLegalAdvisor.put("lawUrl", "ui/amcs/law/externalLegalAdvisor/info");
+        externalLegalAdvisor.put("lawName", "外聘法律顾问信息");
         list.add(all);
         list.add(criminalCase);
         list.add(adminPenalty);
         list.add(disputeMatter);
+        list.add(externalLegalAdvisor);
         return list;
     }
 

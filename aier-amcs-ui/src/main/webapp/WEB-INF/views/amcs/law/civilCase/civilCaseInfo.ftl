@@ -152,7 +152,7 @@
                         }
                     }">
                 </select>
-                <input class="txt txt-validate hide" style="width:50%;" type="text" id="caseTypeTwoDesc" name="caseTypeTwoDesc" placeholder="请填写其他" >${ae.caseTypeTwoDesc!}</input>
+                <input class="txt txt-validate hide" style="width:50%;" type="text" id="caseTypeTwoDesc" name="caseTypeTwoDesc" placeholder="请填写其他" >${bizEntity.caseTypeTwoDesc!}</input>
             </div>
         </div>
     </div>
@@ -182,7 +182,7 @@
                             $('#litigationPhaseDesc').hide();
                         }
                     }" filterkey="firstSpell"/]
-                <input class="txt txt-validate hide" style="width:49%;" type="text" id="litigationPhaseDesc" name="litigationPhaseDesc" placeholder="请填写其他" >${ae.litigationPhaseDesc!}</input>
+                <input class="txt txt-validate hide" style="width:49%;" type="text" id="litigationPhaseDesc" name="litigationPhaseDesc" placeholder="请填写其他" >${bizEntity.litigationPhaseDesc!}</input>
             </div>
         </div>
         <div class="p6 arbitrationPhase-div" style="visibility: hidden;position: absolute;right: 0px">
@@ -196,7 +196,7 @@
                             $('#arbitrationPhaseDesc').hide();
                         }
                     }" filterkey="firstSpell"/]
-                <input class="txt txt-validate hide" style="width:49%;" type="text" id="arbitrationPhaseDesc" name="arbitrationPhaseDesc" placeholder="请填写其他" >${ae.arbitrationPhaseDesc!}</input>
+                <input class="txt txt-validate hide" style="width:49%;" type="text" id="arbitrationPhaseDesc" name="arbitrationPhaseDesc" placeholder="请填写其他" >${bizEntity.arbitrationPhaseDesc!}</input>
             </div>
         </div>
     </div>

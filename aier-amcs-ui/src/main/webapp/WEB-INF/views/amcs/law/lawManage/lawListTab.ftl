@@ -40,6 +40,9 @@
         <li  rel="2">
             <a href="#" class="tabs-inner"><span class="tabs-title">纠纷事项</span></a>
         </li>
+        <li  rel="3">
+            <a href="#" class="tabs-inner"><span class="tabs-title">外聘法律顾问信息</span></a>
+        </li>
     </ul>
     <div class="tabCont tabCont-6 ">
         <iframe scrolling="yes" frameborder="0" id="firstFrame" src="" data-url="${base}/ui/amcs/law/civilCase/listPage" style="width:100%;height:100%;"></iframe>
@@ -52,6 +55,9 @@
     </div>
     <div class="tabCont tabCont-0 tabContHide" >
         <iframe scrolling="yes" frameborder="0"  src="" data-url="${base}/ui/amcs/law/disputeMatter/listPage" style="width:100%;height:100%;"></iframe>
+    </div>
+    <div class="tabCont tabCont-0 tabContHide" >
+        <iframe scrolling="yes" frameborder="0"  src="" data-url="${base}/ui/amcs/law/externalLegalAdvisor/listPage" style="width:100%;height:100%;"></iframe>
     </div>
 </div>
 </body>

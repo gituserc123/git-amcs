@@ -1,12 +1,13 @@
 define(["vue"], function (Vue) {
 
-    function initVueComponent(paramObj) {
+    function initVueComponent(paramObj,opinionUrl) {
         new Vue({
             el: "#tanglv",
             data() {
                 return {
                     adviceTxt: "",
                     paramObj: paramObj || {},
+                    opinionUrl: opinionUrl || "",
                     list: []
                 }
             },
@@ -15,7 +16,7 @@ define(["vue"], function (Vue) {
             },
             methods: {
                 query() {
-                    $ajax.post(`${base}/ui/amcs/law/baseui/getLawOpinionList`, this.paramObj).done((res) => {
+                    $ajax.post(this.opinionUrl, this.paramObj).done((res) => {
                         this.list = res;
                     })
                 }
@@ -45,10 +46,11 @@ define(["vue"], function (Vue) {
     };
 
     var obj = {
-        init: function (paramsObj) {
+        init: function (paramsObj,opinionUrl) {
             this.paramsObj = paramsObj;
+            this.opinionUrl = opinionUrl;
             this.initDom();
-            initVueComponent(this.paramsObj);
+            initVueComponent(this.paramsObj,this.opinionUrl);
         },
         initDom: function () {
             $(".tab-flow").append("<div id='tanglv'></div>");
