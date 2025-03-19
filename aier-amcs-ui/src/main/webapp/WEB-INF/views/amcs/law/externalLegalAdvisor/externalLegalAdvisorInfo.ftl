@@ -285,9 +285,49 @@
         window.submitExternalLegalAdvisorForm = function (opt, $form, data) {
             // 选择提交节点框显示的情况下，提交要检验必选
             if ($('.commonDataForm').form('validate')) {
+                const attachArray = [];
+                let attachFlag = true;
+                // 遍历所有以 "attach-div-" 开头的 <div> 元素
+                $('[class^="attach-div-"]').each(function () {
+                    // 获取当前 div 的 rel 属性值
+                    let relValue = $(this).attr('rel');
+
+                    // 查找当前 <div> 内部的所有 <span class="s-preview"> 节点
+                    const sPreviews = $(this).find('.s-preview');
+
+                    // 检查是否存在 s-previews
+                    /* if (sPreviews.length === 0) {
+                        // 如果没有 s-preview，弹出提示
+                        $pop.warning(relValue + '必须至少上传一个附件！');
+                        attachFlag = false;
+                        return false; // 跳过后续处理
+                    } */
+
+                    // 遍历每个 s-preview 节点
+                    sPreviews.each(function () {
+                        const attach = {};
+                        attach.fileId = $(this).attr('rel'); // 获取 rel 属性值
+                        attach.fileName = $(this).attr('filename'); // 获取 filename 属性值
+                        attach.weburl = $(this).attr('weburl'); // 获取 weburl 属性值
+                        attach.fileSize = $(this).attr('filesize'); // 获取 filesize 属性值
+                        attach.fileType = $(this).attr('filetype'); // 获取 filetype 属性值
+                        attach.filePath = $(this).attr('filepath'); // 获取 filepath 属性值
+                        attach.attachCode = $(this).attr('attachcode'); // 获取 attachcode 属性值
+
+                        // 将当前对象推入数组
+                        attachArray.push(attach);
+                    });
+                });
+
+                if (!attachFlag) {
+                    return false;
+                }
+
+                data.attachs = attachArray;
+
                 $ajax.post('${base}/ui/amcs/law/externalLegalAdvisor/save', data, {
                     jsonData: true,
-                    //tip: '确认退回？',
+                    tip: '确认提交？',
                 }).done(function (rst) {
                     location.href = data.infoUrl + '?bizId=' + rst.bizId;
                     $pop.success('保存成功!');
