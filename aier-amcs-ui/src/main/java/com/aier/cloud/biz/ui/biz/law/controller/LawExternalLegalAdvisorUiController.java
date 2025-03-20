@@ -3,7 +3,6 @@ package com.aier.cloud.biz.ui.biz.law.controller;
 import com.aier.cloud.api.amcs.law.condition.LawAuditOpinionCondition;
 import com.aier.cloud.api.amcs.law.condition.LawExternalLegalAdvisorCondition;
 import com.aier.cloud.api.amcs.law.domain.LawAttachment;
-import com.aier.cloud.api.amcs.law.domain.LawAuditDetail;
 import com.aier.cloud.api.amcs.law.domain.LawAuditOpinion;
 import com.aier.cloud.api.amcs.law.domain.LawExternalLegalAdvisor;
 import com.aier.cloud.basic.api.response.domain.base.PageResponse;
@@ -87,7 +86,7 @@ public class LawExternalLegalAdvisorUiController extends LawBaseUiController {
      */
     @RequestMapping(value = "/info", method = {RequestMethod.GET, RequestMethod.POST})
     public String externalLegalAdvisorInfo(HttpServletRequest request, Long bizId) {
-        LawExternalLegalAdvisor lawExternalLegalAdvisor = new LawExternalLegalAdvisor();
+        LawExternalLegalAdvisor lawExternalLegalAdvisor;
         if (Objects.nonNull(bizId) && bizId.longValue() > 0) {
             lawExternalLegalAdvisor = lawExternalLegalAdvisorFeignService.getLawExternalLegalAdvisor(bizId);
             request.setAttribute("bizId", bizId);
@@ -150,10 +149,8 @@ public class LawExternalLegalAdvisorUiController extends LawBaseUiController {
     @RequestMapping(value = "/saveOpinion", method = RequestMethod.POST)
     @ResponseBody
     public Object saveOpinion(@RequestBody Map<String,Object> dataMaps){
-        LawAuditDetail lawAuditDetail = new LawAuditDetail();
-        lawAuditDetail.setId(MapUtils.getLong(dataMaps,"bizId"));
         String opinion = MapUtils.getString(dataMaps,"opinion");
-        addLawAuditOpinion(lawAuditDetail,opinion);
+        addLawAuditOpinion(MapUtils.getLong(dataMaps,"bizId"),opinion);
         return success();
     }
 

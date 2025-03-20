@@ -1,10 +1,10 @@
 package com.aier.cloud.biz.ui.biz.law.controller;
 
-import com.aier.cloud.api.amcs.adverse.domain.ProvinceRoleConfig;
 import com.aier.cloud.api.amcs.condition.ProvinceRoleCondition;
 import com.aier.cloud.api.amcs.constant.Constants;
 import com.aier.cloud.api.amcs.law.condition.LawAuditOpinionCondition;
 import com.aier.cloud.api.amcs.law.condition.LawBaseCondition;
+import com.aier.cloud.api.amcs.law.enums.NodeInfoEnum;
 import com.aier.cloud.basic.api.domain.base.BaseEntity;
 import com.aier.cloud.api.amcs.law.condition.LawNodeAuthCondition;
 import com.aier.cloud.api.amcs.law.constant.LawConstants;
@@ -217,11 +217,11 @@ public class LawBaseUiController extends BaseController {
      * @return
      */
     protected List<LawNodeAuth> getLawNodeAuthListByStaffId(Long staffId) {
-        List<LawNodeAuth> lawNodeAuths = ShiroUtils.getSessionAttr("SessionLawNodeAuths_" + staffId);
+        List<LawNodeAuth> lawNodeAuths = ShiroUtils.getSessionAttr(LawConstants.SESSION_LAW_NODE_AUTHS_PREFIX + staffId);
         if(CollectionUtils.isEmpty(lawNodeAuths)){
             lawNodeAuths = lawNodeAuthFeignService.getLawNodeAuthListByStaffId(staffId);
             if (CollectionUtils.isNotEmpty(lawNodeAuths)) {
-                ShiroUtils.setSessionAttr("SessionLawNodeAuths_" + staffId,lawNodeAuths);
+                ShiroUtils.setSessionAttr(LawConstants.SESSION_LAW_NODE_AUTHS_PREFIX  + staffId,lawNodeAuths);
             }
         }
         return lawNodeAuths;
@@ -298,17 +298,17 @@ public class LawBaseUiController extends BaseController {
         List<LawNodeAuth> lawNodeAuths = lawNodeAuthFeignService.getLawNodeAuthListByStaffId(ShiroUtils.getId());
         Boolean isAddNodeAuth = false;
         if(Objects.nonNull(lawNodeAuths) && lawNodeAuths.size()>0){
-            if(!isHasNodeAuth(lawNodeAuths,"NODE001")){
+            if(!isHasNodeAuth(lawNodeAuths,NodeInfoEnum.NODE001.getCode())){
                 isAddNodeAuth = true;
             }
         }else{
             isAddNodeAuth = true;
         }
         if(isAddNodeAuth){
-            saveNodeAuthByNodeCode("NODE001");
+            saveNodeAuthByNodeCode(NodeInfoEnum.NODE001.getCode());
             List<LawNodeAuth> sessLawNodeAuths = lawNodeAuthFeignService.getLawNodeAuthListByStaffId(ShiroUtils.getId());
             // 更新session中的节点权限信息
-            ShiroUtils.setSessionAttr("SessionLawNodeAuths_" + ShiroUtils.getId(),sessLawNodeAuths);
+            ShiroUtils.setSessionAttr(LawConstants.SESSION_LAW_NODE_AUTHS_PREFIX + ShiroUtils.getId(),sessLawNodeAuths);
         }
     }
 
@@ -318,11 +318,11 @@ public class LawBaseUiController extends BaseController {
      * @return
      */
     protected LawFlowInstance getFlowInstanceByBizId(Long bizId) {
-        LawFlowInstance lawFlowInstance = ShiroUtils.getSessionAttr("SessionLawFlowInstance_" + bizId);
+        LawFlowInstance lawFlowInstance = ShiroUtils.getSessionAttr(LawConstants.SESSION_LAW_FLOW_INSTANCE_PREFIX + bizId);
         if(lawFlowInstance == null){
             lawFlowInstance = lawFlowInstanceFeignService.getFlowInstanceByBizId(bizId);
             if (lawFlowInstance != null) {
-                ShiroUtils.setSessionAttr("SessionLawFlowInstance_" + bizId,lawFlowInstance);
+                ShiroUtils.setSessionAttr(LawConstants.SESSION_LAW_FLOW_INSTANCE_PREFIX + bizId,lawFlowInstance);
             }
         }
         return lawFlowInstance;
@@ -350,11 +350,11 @@ public class LawBaseUiController extends BaseController {
      * @return
      */
     protected List<LawAuditDetail> getAuditDetailByInstanceId(Long instanceId) {
-        List<LawAuditDetail> lawAuditDetails = ShiroUtils.getSessionAttr("SessionLawAuditDetails_" + instanceId);
+        List<LawAuditDetail> lawAuditDetails = ShiroUtils.getSessionAttr(LawConstants.SESSION_LAW_AUDIT_DETAILS_PREFIX + instanceId);
         if(CollectionUtils.isEmpty(lawAuditDetails)){
             lawAuditDetails = lawAuditDetailFeignService.getLawAuditDetailListByInstanceId(instanceId);
             if (CollectionUtils.isNotEmpty(lawAuditDetails)) {
-                ShiroUtils.setSessionAttr("SessionLawAuditDetails_" + instanceId,lawAuditDetails);
+                ShiroUtils.setSessionAttr(LawConstants.SESSION_LAW_AUDIT_DETAILS_PREFIX + instanceId,lawAuditDetails);
             }
         }
         return lawAuditDetails;
@@ -412,14 +412,14 @@ public class LawBaseUiController extends BaseController {
                 request.setAttribute("attachDelBtnVisible", "hidden");
             }
             LawFlowNode curNode = lawFlowNodes.stream().filter(node -> node.getNodeId().equals(currentNodeId)).findFirst().orElse(null);
-            if(curNode.getNodeCode().equals("NODE001")){
+            if(curNode.getNodeCode().equals(NodeInfoEnum.NODE001.getCode())){
                 // 当前节点为申请人节点时,显示"暂存"按钮
                 request.setAttribute("curNodeName", "");
             }else{
                 request.setAttribute("curNodeName", curNode.getNodeName());
             }
         }else{
-            if(isHasNodeAuth(lawNodeAuths,"NODE001") && instId.longValue() == ShiroUtils.getInstId().longValue()){
+            if(isHasNodeAuth(lawNodeAuths,NodeInfoEnum.NODE001.getCode()) && instId.longValue() == ShiroUtils.getInstId().longValue()){
                 // 判断当前用户是否有申请人角色，同时是否属于当前业务的创建机构
                 request.setAttribute("opDivDisplay", "flex");
                 request.setAttribute("backBtnDisplay", "none");
@@ -537,9 +537,9 @@ public class LawBaseUiController extends BaseController {
         return lawAuditDetailFeignService.save(lawAuditDetail);
     }
 
-    protected void addLawAuditOpinion(LawAuditDetail lawAuditDetail,String opinion){
+    protected void addLawAuditOpinion(Long detailId,String opinion){
         LawAuditOpinion lawAuditOpinion = new LawAuditOpinion();
-        lawAuditOpinion.setDetailId(lawAuditDetail.getId());
+        lawAuditOpinion.setDetailId(detailId);
         lawAuditOpinion.setOpinion(opinion);
         lawAuditOpinion.setCreator(ShiroUtils.getId());
         lawAuditOpinion.setCreateDate(new Date());
@@ -667,15 +667,15 @@ public class LawBaseUiController extends BaseController {
         lawFlowInstance.setModifyDate(new Date());
         lawFlowInstance = insertOrUpdateFlowInstance(lawFlowInstance);
         // 3.更新session中的流程实例信息
-        ShiroUtils.removeSessionAttr("SessionLawFlowInstance_" + bizId);
+        ShiroUtils.removeSessionAttr(LawConstants.SESSION_LAW_FLOW_INSTANCE_PREFIX + bizId);
         // 4.保存审核明细
         LawAuditDetail retdetail = addLawDetailInfo(lawFlowInstance,action);
         // 5.更新session中的流程明细信息
-        ShiroUtils.removeSessionAttr("SessionLawAuditDetails_" + lawFlowInstance.getId());
+        ShiroUtils.removeSessionAttr(LawConstants.SESSION_LAW_AUDIT_DETAILS_PREFIX + lawFlowInstance.getId());
         // 6.保存审核意见信息
         if(Objects.nonNull(opinion) && opinion.length() > 0){
             if(Objects.nonNull(retdetail.getId()) && retdetail.getId().longValue()>0){
-                addLawAuditOpinion(retdetail,opinion);
+                addLawAuditOpinion(retdetail.getId(),opinion);
             }
         }
         // TODO 发送企业微信消息
@@ -696,26 +696,26 @@ public class LawBaseUiController extends BaseController {
         lawFlowInstance.setModifyDate(new Date());
         lawFlowInstance = insertOrUpdateFlowInstance(lawFlowInstance);
         // 3.更新session中的流程实例信息
-        ShiroUtils.removeSessionAttr("SessionLawFlowInstance_" + bizId);
+        ShiroUtils.removeSessionAttr(LawConstants.SESSION_LAW_FLOW_INSTANCE_PREFIX + bizId);
         // 4.保存审核明细
         LawAuditDetail retdetail = addLawDetailInfo(lawFlowInstance,"REJECT");
         // 5.更新session中的流程明细信息
-        ShiroUtils.removeSessionAttr("SessionLawAuditDetails_" + lawFlowInstance.getId());
+        ShiroUtils.removeSessionAttr(LawConstants.SESSION_LAW_AUDIT_DETAILS_PREFIX + lawFlowInstance.getId());
         // 6.保存审核意见信息
         if(Objects.nonNull(opinion) && opinion.length() > 0){
             if(Objects.nonNull(retdetail.getId()) && retdetail.getId().longValue()>0){
-                addLawAuditOpinion(retdetail,opinion);
+                addLawAuditOpinion(retdetail.getId(),opinion);
             }
         }
         // TODO 发送企业微信消息
     }
 
     protected List<LawNodeInfo> getAllNodeInfo(){
-        List<LawNodeInfo> lawNodeInfos = ShiroUtils.getSessionAttr("SessionLawNodeInfos");
+        List<LawNodeInfo> lawNodeInfos = ShiroUtils.getSessionAttr(LawConstants.SESSION_LAW_NODE_INFOS_PREFIX);
         if(CollectionUtils.isEmpty(lawNodeInfos)){
             lawNodeInfos = lawNodeInfoFeignService.getAllNodeInfo();
             if (CollectionUtils.isNotEmpty(lawNodeInfos)) {
-                ShiroUtils.setSessionAttr("SessionLawNodeInfos",lawNodeInfos);
+                ShiroUtils.setSessionAttr(LawConstants.SESSION_LAW_NODE_INFOS_PREFIX,lawNodeInfos);
             }
         }
         return lawNodeInfos;
@@ -748,7 +748,7 @@ public class LawBaseUiController extends BaseController {
                             ArrayList<Long> hospList = Lists.newArrayList();
                             ja.stream().forEach(j -> {
                                 JSONObject jo = (JSONObject) j;
-                                hospList.add(jo.getLong("ahisHosp"));
+                                hospList.add(jo.getLong("id"));
                             });
                             cond.setInstId(null);
                             // 如果hospList为空，说明当前机构下没有医院，直接返回
