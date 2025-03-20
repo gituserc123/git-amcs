@@ -34,6 +34,8 @@ public class LawCivilCaseUiController extends LawBaseUiController {
 
     @RequestMapping(value = "/listPage")
     public String listPage(HttpServletRequest request){
+        request.setAttribute("empType", getEmpType());
+        request.setAttribute("instId", ShiroUtils.getInstId());
         return CIVIL_CASE_LIST;
     }
 

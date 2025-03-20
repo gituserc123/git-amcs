@@ -1,5 +1,6 @@
 package com.aier.cloud.biz.ui.biz.law.controller;
 
+import com.aier.cloud.api.amcs.adverse.domain.ProvinceRoleConfig;
 import com.aier.cloud.api.amcs.condition.ProvinceRoleCondition;
 import com.aier.cloud.api.amcs.constant.Constants;
 import com.aier.cloud.api.amcs.law.condition.LawAuditOpinionCondition;
@@ -436,6 +437,21 @@ public class LawBaseUiController extends BaseController {
             request.setAttribute("curNodeName", "");
         }
 
+    }
+
+
+    protected int getEmpType() {
+        if (!ShiroUtils.getIsHosp()) {
+            // 集团或省区登录
+            if (LawConstants.GroupInstId.equals(ShiroUtils.getInstId())) {
+                // 集团登录
+                return LawConstants.Group;
+            } else {
+                // 省区登录
+                return LawConstants.Province;
+            }
+        }
+        return LawConstants.Hosp;
     }
 
     /**

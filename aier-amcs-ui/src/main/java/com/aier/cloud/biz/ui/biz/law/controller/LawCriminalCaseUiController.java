@@ -38,6 +38,8 @@ public class LawCriminalCaseUiController extends LawBaseUiController {
      */
     @RequestMapping(value = "/listPage")
     public String listPage(HttpServletRequest request){
+        request.setAttribute("empType", getEmpType());
+        request.setAttribute("instId", ShiroUtils.getInstId());
         return CRIMINAL_CASE_LIST;
     }
 
@@ -47,6 +49,10 @@ public class LawCriminalCaseUiController extends LawBaseUiController {
     @RequestMapping(value = "/queryCriminalCaseList", method = RequestMethod.POST)
     @ResponseBody
     public PageResponse<Map<String, Object>> queryCriminalCaseList(LawCriminalCaseCondition cond){
+        Boolean isRetNull = wrapperCond(cond);
+        if(isRetNull){
+            return new PageResponse<>();
+        }
         PageResponse<Map<String, Object>> resultPages = lawCriminalCaseFeignService.findListByCond(cond);
         List<Map<String, Object>> result = resultPages.getRows();
         if(CollectionUtils.isNotEmpty(result) && result.size() > 0){

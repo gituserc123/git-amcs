@@ -14,6 +14,16 @@
 <body>
 <div class="searchHead">
     <form id="sbox" class="soform form-enter">
+        [#if empType==1]
+        <label class="lab-inline">省区：</label>
+        <select class="drop drop-sl-v easyui-combobox  w-150" name="province" id="province"  data-options="valueField:'id',textField:'name',clearIcon:true">
+            [/#if]
+        </select>
+        [#if empType==1 || empType==2]
+            <label class="lab-inline">医院：</label>
+            <select class="drop drop-sl-v easyui-combobox  w-150" name="instId" id="instId"  data-options="valueField:'id',textField:'name',clearIcon:true">
+            </select>
+        [/#if]
         <button type="button" class="btn btn-small btn-primary so-search" data-opt="{grid:'#gridBox', scope:'#sbox'}">查 询</button>
         <button type="button" class="btn btn-small btn-primary s-export">导 出</button>
     </form>
@@ -25,6 +35,7 @@
 [#include "/WEB-INF/views/common/include_js.ftl"]
 <script type="text/javascript">
     requirejs(["lodash", "easygridEdit", "pub"], function (_, $e) {
+        this.reloadReactData();
 
         $grid.newGrid("#gridBox", {
             pagination: true,
@@ -81,5 +92,8 @@
         });
 
     });
+
+    [#include "/WEB-INF/views/amcs/law/common/selectInit_js.ftl"]
+
 </script>
 </html>

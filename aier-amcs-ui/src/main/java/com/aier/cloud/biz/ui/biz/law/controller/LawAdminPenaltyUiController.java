@@ -35,12 +35,18 @@ public class LawAdminPenaltyUiController extends LawBaseUiController {
 
     @RequestMapping(value = "/listPage")
     public String listPage(HttpServletRequest request) {
+        request.setAttribute("empType", getEmpType());
+        request.setAttribute("instId", ShiroUtils.getInstId());
         return ADMIN_PENALTY_LIST;
     }
 
     @RequestMapping(value = "/queryAdminPenaltyList", method = { RequestMethod.POST })
     @ResponseBody
     public PageResponse<Map<String, Object>> queryAdminPenaltyList(LawAdminPenaltyCondition cond) {
+        Boolean isRetNull = wrapperCond(cond);
+        if(isRetNull){
+            return new PageResponse<>();
+        }
         PageResponse<Map<String, Object>> resultPages = lawAdminPenaltyFeignService.findListByCond(cond);
         List<Map<String, Object>> result = resultPages.getRows();
         if(CollectionUtils.isNotEmpty(result) && result.size() > 0){

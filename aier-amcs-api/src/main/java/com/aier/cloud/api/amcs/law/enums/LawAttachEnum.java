@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.enums.IEnum;
 
 import java.io.Serializable;
 
-public enum CivilCaseAttachEnum implements IEnum, EnumDict<CivilCaseAttachEnum> {
+public enum LawAttachEnum implements IEnum, EnumDict<LawAttachEnum> {
 
     BUSINESS_LICENSE("business-license", "案涉对方主体企业法人营业执照/自然人身份证", 1),
     COMPLAINT_FILE("complaint-file", "起诉状", 2),
@@ -18,7 +18,7 @@ public enum CivilCaseAttachEnum implements IEnum, EnumDict<CivilCaseAttachEnum> 
     private final String desc;
     private final int value;
 
-    CivilCaseAttachEnum(String code, String desc, int value) {
+    LawAttachEnum(String code, String desc, int value) {
         this.code = code;
         this.desc = desc;
         this.value = value;

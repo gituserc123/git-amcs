@@ -30,13 +30,18 @@ public class LawDisputeMatterUiController extends LawBaseUiController {
 
     @RequestMapping(value = "/listPage")
     public String listPage(HttpServletRequest request) {
+        request.setAttribute("empType", getEmpType());
+        request.setAttribute("instId", ShiroUtils.getInstId());
         return DISPUTE_MATTER_LIST;
     }
 
     @RequestMapping(value = "/queryDisputeMatterList", method = { RequestMethod.POST })
     @ResponseBody
-    public PageResponse<Map<String, Object>> queryDisputeMatterList() {
-        LawDisputeMatterCondition cond = new LawDisputeMatterCondition();
+    public PageResponse<Map<String, Object>> queryDisputeMatterList(LawDisputeMatterCondition cond) {
+        Boolean isRetNull = wrapperCond(cond);
+        if(isRetNull){
+            return new PageResponse<>();
+        }
         return lawDisputeMatterFeignService.findListByCond(cond);
     }
 

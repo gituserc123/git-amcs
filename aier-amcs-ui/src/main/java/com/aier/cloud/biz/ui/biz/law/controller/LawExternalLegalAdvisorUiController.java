@@ -14,6 +14,7 @@ import com.aier.cloud.biz.ui.biz.law.feign.LawAuditOpinionFeignService;
 import com.aier.cloud.biz.ui.biz.law.feign.LawExternalLegalAdvisorFeignService;
 import com.aier.cloud.biz.ui.biz.law.feign.LawDictTypeFeignService;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,6 +48,8 @@ public class LawExternalLegalAdvisorUiController extends LawBaseUiController {
      */
     @RequestMapping(value = "/listPage")
     public String listPage(HttpServletRequest request) {
+        request.setAttribute("empType", getEmpType());
+        request.setAttribute("instId", ShiroUtils.getInstId());
         return EXTERNAL_LEGAL_ADVISOR_LIST;
     }
 
@@ -56,7 +59,26 @@ public class LawExternalLegalAdvisorUiController extends LawBaseUiController {
     @RequestMapping(value = "/queryExternalLegalAdvisorList", method = {RequestMethod.POST})
     @ResponseBody
     public PageResponse<Map<String, Object>> queryExternalLegalAdvisorList(LawExternalLegalAdvisorCondition cond) {
+        Boolean isRetNull = wrapperCond(cond);
+        if(isRetNull){
+            return new PageResponse<>();
+        }
         PageResponse<Map<String, Object>> resultPages = lawExternalLegalAdvisorFeignService.findListByCond(cond);
+        List<Map<String, Object>> result = resultPages.getRows();
+        if(CollectionUtils.isNotEmpty(result) && result.size() > 0){
+            List<Map> expertiseFieldDict = lawDictTypeFeignService.selectByTypeCode("expertise_field");
+            List<Map> serviceTypeDict = lawDictTypeFeignService.selectByTypeCode("service_type");
+            for(Map<String, Object> map : result){
+                if(Objects.nonNull(MapUtils.getString(map, "expertiseField"))){
+                    Map expertiseField = expertiseFieldDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "expertiseField"))).findFirst().get();
+                    map.put("expertiseFieldTxt", MapUtils.getString(expertiseField,"valueDesc"));
+                }
+                if(Objects.nonNull(MapUtils.getString(map, "serviceType"))){
+                    Map serviceType = serviceTypeDict.stream().filter(e -> MapUtils.getString(e,"valueCode").equals(MapUtils.getString(map, "serviceType"))).findFirst().get();
+                    map.put("serviceTypeTxt", MapUtils.getString(serviceType,"valueDesc"));
+                }
+            }
+        }
         return resultPages;
     }
 
