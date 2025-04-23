@@ -51,7 +51,6 @@ public class LawAttachmentController extends BaseController {
         EntityWrapper<LawAttachment> wrapper = new EntityWrapper<>();
         wrapper.eq("biz_id",bizId);
         wrapper.eq("file_id",fileId);
-        lawAttachmentService.delete(wrapper);
         return lawAttachmentService.delete(wrapper);
     }
 }

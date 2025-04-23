@@ -132,7 +132,7 @@ public class LawBaseUiController extends BaseController {
 
             return JSON.toJSONString(result);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("File upload failed: {}", e.getMessage(), e);
             return this.fail("文件上传失败！");
         }
     }

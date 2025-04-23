@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aier.cloud.biz.service.biz.amcs.law.dao.LawIntegrityFilingMapper">
+
+	<!-- 结果映射 -->
+	<resultMap id="BaseResultMap" type="com.aier.cloud.biz.service.biz.amcs.law.entity.LawIntegrityFiling">
+		<!-- 主键 -->
+		<id column="ID" jdbcType="DECIMAL" property="id" />
+
+		<!-- 其他字段 -->
+		<result column="EVENT_SN" jdbcType="VARCHAR" property="eventSn" />
+		<result column="INST_ID" jdbcType="DECIMAL" property="instId" />
+		<result column="INST_NAME" jdbcType="VARCHAR" property="instName" />
+		<result column="REPORTER_NAME" jdbcType="VARCHAR" property="reporterName" />
+		<result column="REPORT_DATE" jdbcType="TIMESTAMP" property="reportDate" />
+		<result column="EVENT_TYPE" jdbcType="DECIMAL" property="eventType" />
+		<result column="EVENT_TYPE_OTHER" jdbcType="VARCHAR" property="eventTypeOther" />
+		<result column="OCCURRENCE_TIME" jdbcType="TIMESTAMP" property="occurrenceTime" />
+		<result column="EVENT_DESCRIPTION" jdbcType="VARCHAR" property="eventDescription" />
+		<result column="AMOUNT" jdbcType="DECIMAL" property="amount" />
+		<result column="RELATED_PARTY_NAME" jdbcType="VARCHAR" property="relatedPartyName" />
+		<result column="HANDLING_RESULT" jdbcType="VARCHAR" property="handlingResult" />
+		<result column="HOSP_ID" jdbcType="DECIMAL" property="hospId"/>
+		<result column="CREATOR" jdbcType="DECIMAL" property="creator" />
+		<result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
+		<result column="MODIFER" jdbcType="DECIMAL" property="modifer" />
+		<result column="MODIFY_DATE" jdbcType="TIMESTAMP" property="modifyDate" />
+	</resultMap>
+
+	<!-- 基础字段列表 -->
+	<sql id="BaseColumnList">
+		ID, INST_ID, INST_NAME, EVENT_SN,REPORTER_NAME, REPORT_DATE, EVENT_TYPE, EVENT_TYPE_OTHER,
+		OCCURRENCE_TIME, EVENT_DESCRIPTION, AMOUNT, RELATED_PARTY_NAME, HANDLING_RESULT, HOSP_ID,
+		CREATOR, CREATE_DATE, MODIFER, MODIFY_DATE
+	</sql>
+
+	<sql id="sql_where">
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			1=1
+			<if test="cond.id != null and cond.id > 0">
+				and t.id = #{cond.id}
+			</if>
+			<if test="cond.instId != null and cond.instId > 0">
+				and t.inst_id = #{cond.instId}
+			</if>
+			<if test="cond.instName != null and !cond.instName.isEmpty()">
+				and t.inst_name like CONCAT('%', #{cond.instName}, '%')
+			</if>
+			<if test="cond.reporterName != null and !cond.reporterName.isEmpty()">
+				and t.reporter_name like CONCAT('%', #{cond.reporterName}, '%')
+			</if>
+			<if test="cond.eventType != null and cond.eventType > 0">
+				and t.event_type = #{cond.eventType}
+			</if>
+			<if test="cond.startDate != null">
+				and t.report_date >= #{cond.startDate}
+			</if>
+			<if test="cond.endDate != null">
+				and t.report_date &lt;= #{cond.endDate}
+			</if>
+		</trim>
+	</sql>
+
+	<select id="getAll" resultType="java.util.Map">
+		SELECT
+		<include refid="BaseColumnList" />
+		FROM T_LAW_INTEGRITY_FILING t
+		<include refid="sql_where" />
+	</select>
+
+</mapper>
